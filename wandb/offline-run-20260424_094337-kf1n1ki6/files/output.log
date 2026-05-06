@@ -1,0 +1,8 @@
+{
+  "regression_loss_plot": "artifacts/wandb_iid_plots/regression_iid_loss_train_val_test.png",
+  "regression_score_plot": "artifacts/wandb_iid_plots/regression_iid_score_train_val_test.png",
+  "classification_loss_plot": "artifacts/wandb_iid_plots/classification_iid_loss_train_val_test.png",
+  "classification_score_plot": "artifacts/wandb_iid_plots/classification_iid_score_train_val_test.png",
+  "classification_confusion_matrix": "artifacts/wandb_iid_plots/classification_iid_test_confusion_matrix.png",
+  "wandb_run_name": "iid-flower-result-plots"
+}

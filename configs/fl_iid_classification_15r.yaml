@@ -1,0 +1,59 @@
+seed: 4601
+output_dir: artifacts
+artifact_name: raw_windows.pt
+
+data:
+  dataset_root: ../TestData/20251124_Testing
+  sensor_channel_map:
+    "1": [1]
+    "2": [2]
+    "3": [3]
+    "4": [4]
+    "5": [5]
+    "6": [6]
+    "7": [7]
+    "8x": [8]
+    "8y": [9]
+    "8z": [10]
+    "9x": [11]
+    "9y": [12]
+    "9z": [13]
+    "10": [14]
+    "11": [15]
+    "12": [16]
+    "13": [17]
+    "14": [18]
+    "15": [19]
+    "16": [20]
+  selected_sensors: ["1", "2", "3", "4", "5", "6", "7", "8x", "8y", "8z", "9x", "9y", "9z", "10", "11", "12", "13", "14", "15", "16"]
+  target_sample_rate: 400.0
+  window_seconds: 5.0
+  step_seconds: 1.0
+  train_ratio: 0.6
+  val_ratio: 0.2
+  test_ratio: 0.2
+  subject_limit: null
+
+training:
+  task: classification
+  batch_size: 32
+  epochs: 15
+  learning_rate: 0.001
+  weight_decay: 0.0001
+  num_workers: 0
+
+federated:
+  num_clients: 3
+  num_rounds: 15
+  local_epochs: 1
+  fraction_fit: 1.0
+  fraction_evaluate: 0.0
+  client_num_cpus: 1.0
+  client_num_gpus: 0.0
+
+wandb:
+  enabled: true
+  project: ENGR859-final-project
+  entity: null
+  tags: ["flower", "iid", "classification", "15-rounds", "raw-vibration"]
+  watch: false

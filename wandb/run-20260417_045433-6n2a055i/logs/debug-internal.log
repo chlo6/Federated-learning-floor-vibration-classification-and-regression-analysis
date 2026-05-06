@@ -1,0 +1,19 @@
+{"time":"2026-04-17T04:54:34.138506874Z","level":"INFO","msg":"wandb-core"}
+{"time":"2026-04-17T04:54:34.143309568Z","level":"INFO","msg":"stream: starting","core version":"0.26.0"}
+{"time":"2026-04-17T04:54:34.497158003Z","level":"INFO","msg":"stream: created new stream","id":"6n2a055i"}
+{"time":"2026-04-17T04:54:34.497457824Z","level":"INFO","msg":"handler: started"}
+{"time":"2026-04-17T04:54:34.497765651Z","level":"INFO","msg":"stream: started"}
+{"time":"2026-04-17T04:54:34.49803783Z","level":"INFO","msg":"writer: started","stream_id":"6n2a055i"}
+{"time":"2026-04-17T04:54:34.498114014Z","level":"INFO","msg":"sender: started"}
+{"time":"2026-04-17T04:54:40.819166425Z","level":"INFO","msg":"filestream: sending request","total_files":0,"uploaded_len":1}
+{"time":"2026-04-17T04:54:41.980153006Z","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-04-17T04:54:55.835537653Z","level":"INFO","msg":"filestream: sending request","total_files":3,"history_offset":0,"history_lines":14,"events_offset":0,"events_lines":2,"uploaded_len":1}
+{"time":"2026-04-17T04:54:56.932388598Z","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2026-04-17T04:55:09.309620203Z","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-04-17T04:55:09.310880337Z","level":"INFO","msg":"filestream: sending request","total_files":2,"history_offset":14,"history_lines":2,"uploaded_len":2,"complete":true,"exit_code":0}
+{"time":"2026-04-17T04:55:14.454909975Z","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-04-17T04:55:14.4622794Z","level":"INFO","msg":"handler: operation stats","stats":{}}
+{"time":"2026-04-17T04:55:14.504053583Z","level":"INFO","msg":"stream: closing"}
+{"time":"2026-04-17T04:55:14.504121188Z","level":"INFO","msg":"handler: closed"}
+{"time":"2026-04-17T04:55:14.504314133Z","level":"INFO","msg":"sender: closed"}
+{"time":"2026-04-17T04:55:14.504353951Z","level":"INFO","msg":"stream: closed"}

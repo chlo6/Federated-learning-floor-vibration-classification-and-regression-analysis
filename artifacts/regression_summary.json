@@ -1,0 +1,10 @@
+{
+  "task": "regression",
+  "model_path": "/home/coder/workspace/ENGR859-final-project/artifacts/regression_baseline.pt",
+  "history_path": "/home/coder/workspace/ENGR859-final-project/artifacts/regression_history.csv",
+  "best_epoch": 15,
+  "best_val_loss": 0.02372501640199315,
+  "best_val_score": 0.1540292650461197,
+  "test_loss": 0.054598997815843396,
+  "test_score": 0.23366428911685944
+}

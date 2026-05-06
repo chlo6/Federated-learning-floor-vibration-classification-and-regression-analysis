@@ -1,0 +1,14 @@
+{
+  "task": "classification",
+  "model_path": "/home/coder/workspace/ENGR859-final-project/artifacts/classification_flower_model.pt",
+  "history_path": "/home/coder/workspace/ENGR859-final-project/artifacts/classification_federated_history.csv",
+  "partition_summary_path": "/home/coder/workspace/ENGR859-final-project/artifacts/classification_federated_partitions.json",
+  "num_clients": 3,
+  "num_rounds": 5,
+  "local_epochs": 1,
+  "best_val_round": 0,
+  "best_val_loss": 1.824887142085389,
+  "best_val_score": 0.16778524219989777,
+  "test_loss": 1.8007620949073126,
+  "test_score": 0.16778524219989777
+}

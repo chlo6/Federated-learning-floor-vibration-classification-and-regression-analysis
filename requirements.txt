@@ -1,0 +1,8 @@
+numpy
+scipy
+PyYAML
+torch
+matplotlib
+h5py
+wandb
+flwr[simulation]

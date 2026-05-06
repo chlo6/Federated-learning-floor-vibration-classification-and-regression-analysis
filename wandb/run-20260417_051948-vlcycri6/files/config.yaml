@@ -1,0 +1,142 @@
+_wandb:
+    value:
+        cli_version: 0.26.0
+        e:
+            sugtfhpyhcr5pa7196lmzzd9rhexbynr:
+                args:
+                    - --config
+                    - configs/classification.yaml
+                codePath: redo-by-sara/scripts/train_baseline.py
+                codePathLocal: scripts/train_baseline.py
+                cpu_count: 16
+                cpu_count_logical: 24
+                cudaVersion: "12.8"
+                disk:
+                    /:
+                        total: "1005867986944"
+                        used: "868677488640"
+                email: smeschi@sfsu.edu
+                executable: /home/coder/conda/envs/torch311/bin/python
+                git:
+                    commit: e65f5732792e8090dfd37583af27743d71eecc5a
+                    remote: https://github.com/iamtheeel/shake.git
+                gpu: NVIDIA GeForce RTX 3080 Ti
+                gpu_count: 1
+                gpu_nvidia:
+                    - architecture: Ampere
+                      cudaCores: 10240
+                      memoryTotal: "12884901888"
+                      name: NVIDIA GeForce RTX 3080 Ti
+                      uuid: GPU-51fc4996-2e7c-d848-b976-5825cc2266fd
+                host: sara-pytorch
+                memory:
+                    total: "67200548864"
+                os: Linux-6.17.0-14-generic-x86_64-with-glibc2.35
+                program: /home/coder/workspace/shake/redo-by-sara/scripts/train_baseline.py
+                python: CPython 3.11.15
+                root: /home/coder/workspace/shake/redo-by-sara
+                startedAt: "2026-04-17T05:19:48.740996Z"
+                writerId: sugtfhpyhcr5pa7196lmzzd9rhexbynr
+        m: []
+        python_version: 3.11.15
+        t:
+            "1":
+                - 1
+            "2":
+                - 1
+            "3":
+                - 1
+                - 2
+                - 13
+                - 15
+                - 16
+                - 61
+                - 62
+            "4": 3.11.15
+            "5": 0.26.0
+            "12": 0.26.0
+            "13": linux-x86_64
+artifact_name:
+    value: raw_windows.pt
+batch_size:
+    value: 32
+dataset_root:
+    value: /home/coder/workspace/shake/TestData/20251124_Testing
+epochs:
+    value: 15
+learning_rate:
+    value: 0.001
+num_subjects:
+    value: 6
+num_test:
+    value: 149
+num_train:
+    value: 451
+num_val:
+    value: 149
+sample_shape:
+    value:
+        - 20
+        - 2000
+seed:
+    value: 4601
+selected_channels:
+    value:
+        - 1
+        - 2
+        - 3
+        - 4
+        - 5
+        - 6
+        - 7
+        - 8
+        - 9
+        - 10
+        - 11
+        - 12
+        - 13
+        - 14
+        - 15
+        - 16
+        - 17
+        - 18
+        - 19
+        - 20
+selected_sensors:
+    value:
+        - "1"
+        - "2"
+        - "3"
+        - "4"
+        - "5"
+        - "6"
+        - "7"
+        - 8x
+        - 8y
+        - 8z
+        - 9x
+        - 9y
+        - 9z
+        - "10"
+        - "11"
+        - "12"
+        - "13"
+        - "14"
+        - "15"
+        - "16"
+step_seconds:
+    value: 1
+target_sample_rate:
+    value: 400
+task:
+    value: classification
+test_ratio:
+    value: 0.2
+train_ratio:
+    value: 0.6
+val_ratio:
+    value: 0.2
+weight_decay:
+    value: 0.0001
+window_seconds:
+    value: 5

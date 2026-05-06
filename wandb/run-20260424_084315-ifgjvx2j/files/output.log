@@ -1,0 +1,702 @@
+[93mWARNING [0m:   DEPRECATED FEATURE: flwr.simulation.start_simulation() is deprecated.
+	Instead, use the `flwr run` CLI command to start a local simulation in your Flower app, as shown for example below:
+
+		$ flwr new  # Create a new Flower app from a template
+
+		$ flwr run  # Run the Flower app in Simulation Mode
+
+	Using `start_simulation()` is deprecated.
+
+            This is a deprecated feature. It will be removed
+            entirely in future versions of Flower.
+
+[92mINFO [0m:      Starting Flower simulation, config: num_rounds=5, no round_timeout
+2026-04-24 08:43:26,845	INFO worker.py:2012 -- Started a local Ray instance.
+/home/coder/conda/envs/torch311/lib/python3.11/site-packages/ray/_private/worker.py:2051: FutureWarning: Tip: In future versions of Ray, Ray will no longer override accelerator visible devices env var if num_gpus=0 or num_gpus=None (default). To enable this behavior and turn off this error message, set RAY_ACCEL_ENV_VAR_OVERRIDE_ON_ZERO=0
+  warnings.warn(
+[92mINFO [0m:      Flower VCE: Ray initialized with resources: {'node:__internal_head__': 1.0, 'accelerator_type:G': 1.0, 'CPU': 24.0, 'memory': 22032341812.0, 'GPU': 1.0, 'object_store_memory': 9442432204.0, 'node:172.17.0.6': 1.0}
+[92mINFO [0m:      Optimize your simulation with Flower VCE: https://flower.ai/docs/framework/how-to-run-simulations.html
+[92mINFO [0m:      Flower VCE: Resources for each Virtual Client: {'num_cpus': 1.0, 'num_gpus': 0.0}
+[92mINFO [0m:      Flower VCE: Creating VirtualClientEngineActorPool with 24 actors
+[92mINFO [0m:      [INIT]
+[92mINFO [0m:      Using initial global parameters provided by strategy
+[92mINFO [0m:      Starting evaluation of initial global parameters
+[92mINFO [0m:      initial parameters (loss, other metrics): 3.420815861465147, {'val_score': 1.8495447635650635}
+[92mINFO [0m:
+[92mINFO [0m:      [ROUND 1]
+[92mINFO [0m:      configure_fit: strategy sampled 3 clients (out of 3)
+[91mERROR [0m:     Traceback (most recent call last):
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 90, in _submit_job
+    out_mssg, updated_context = self.actor_pool.get_client_result(
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 400, in get_client_result
+    return self._fetch_future_result(cid)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 281, in _fetch_future_result
+    res_cid, out_mssg, updated_context = ray.get(
+                                         ^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/ray/_private/auto_init_hook.py", line 22, in auto_init_wrapper
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/ray/_private/client_mode_hook.py", line 104, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/ray/_private/worker.py", line 2961, in get
+    values, debugger_breakpoint = worker.get_objects(
+                                  ^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/ray/_private/worker.py", line 1026, in get_objects
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(RaySystemError): [36mray::ClientAppActor.run()[39m (pid=4048355, ip=172.17.0.6, actor_id=9b8f0467fc114f295505921501000000, repr=<flwr.simulation.ray_transport.ray_actor.ClientAppActor object at 0x7f14f7fba550>)
+  At least one of the input arguments for this task could not be computed:
+ray.exceptions.RaySystemError: System error: No module named 'redo_by_sara'
+traceback: Traceback (most recent call last):
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          ^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'redo_by_sara'
+
+[91mERROR [0m:     [36mray::ClientAppActor.run()[39m (pid=4048355, ip=172.17.0.6, actor_id=9b8f0467fc114f295505921501000000, repr=<flwr.simulation.ray_transport.ray_actor.ClientAppActor object at 0x7f14f7fba550>)
+  At least one of the input arguments for this task could not be computed:
+ray.exceptions.RaySystemError: System error: No module named 'redo_by_sara'
+traceback: Traceback (most recent call last):
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          ^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'redo_by_sara'
+[91mERROR [0m:     Traceback (most recent call last):
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 90, in _submit_job
+    out_mssg, updated_context = self.actor_pool.get_client_result(
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 400, in get_client_result
+    return self._fetch_future_result(cid)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 281, in _fetch_future_result
+    res_cid, out_mssg, updated_context = ray.get(
+                                         ^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/ray/_private/auto_init_hook.py", line 22, in auto_init_wrapper
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/ray/_private/client_mode_hook.py", line 104, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/ray/_private/worker.py", line 2961, in get
+    values, debugger_breakpoint = worker.get_objects(
+                                  ^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/ray/_private/worker.py", line 1026, in get_objects
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(RaySystemError): [36mray::ClientAppActor.run()[39m (pid=4048362, ip=172.17.0.6, actor_id=2d06653740c4d1d53788d22c01000000, repr=<flwr.simulation.ray_transport.ray_actor.ClientAppActor object at 0x7975d77ec7d0>)
+  At least one of the input arguments for this task could not be computed:
+ray.exceptions.RaySystemError: System error: No module named 'redo_by_sara'
+traceback: Traceback (most recent call last):
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          ^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'redo_by_sara'
+
+[91mERROR [0m:     [36mray::ClientAppActor.run()[39m (pid=4048362, ip=172.17.0.6, actor_id=2d06653740c4d1d53788d22c01000000, repr=<flwr.simulation.ray_transport.ray_actor.ClientAppActor object at 0x7975d77ec7d0>)
+  At least one of the input arguments for this task could not be computed:
+ray.exceptions.RaySystemError: System error: No module named 'redo_by_sara'
+traceback: Traceback (most recent call last):
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          ^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'redo_by_sara'
+[91mERROR [0m:     Traceback (most recent call last):
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 90, in _submit_job
+    out_mssg, updated_context = self.actor_pool.get_client_result(
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 400, in get_client_result
+    return self._fetch_future_result(cid)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 281, in _fetch_future_result
+    res_cid, out_mssg, updated_context = ray.get(
+                                         ^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/ray/_private/auto_init_hook.py", line 22, in auto_init_wrapper
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/ray/_private/client_mode_hook.py", line 104, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/ray/_private/worker.py", line 2961, in get
+    values, debugger_breakpoint = worker.get_objects(
+                                  ^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/ray/_private/worker.py", line 1026, in get_objects
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(RaySystemError): [36mray::ClientAppActor.run()[39m (pid=4048363, ip=172.17.0.6, actor_id=4ef936150bf61e384fad3d9301000000, repr=<flwr.simulation.ray_transport.ray_actor.ClientAppActor object at 0x784f7a7a7950>)
+  At least one of the input arguments for this task could not be computed:
+ray.exceptions.RaySystemError: System error: No module named 'redo_by_sara'
+traceback: Traceback (most recent call last):
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          ^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'redo_by_sara'
+
+[91mERROR [0m:     [36mray::ClientAppActor.run()[39m (pid=4048363, ip=172.17.0.6, actor_id=4ef936150bf61e384fad3d9301000000, repr=<flwr.simulation.ray_transport.ray_actor.ClientAppActor object at 0x784f7a7a7950>)
+  At least one of the input arguments for this task could not be computed:
+ray.exceptions.RaySystemError: System error: No module named 'redo_by_sara'
+traceback: Traceback (most recent call last):
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          ^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'redo_by_sara'
+[92mINFO [0m:      aggregate_fit: received 0 results and 3 failures
+[36m(ClientAppActor pid=4048355)[0m No module named 'redo_by_sara'
+[36m(ClientAppActor pid=4048355)[0m Traceback (most recent call last):
+[36m(ClientAppActor pid=4048355)[0m   File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/ray/_private/serialization.py", line 569, in deserialize_objects
+[36m(ClientAppActor pid=4048355)[0m     obj = self._deserialize_object(
+[36m(ClientAppActor pid=4048355)[0m           ^^^^^^^^^^^^^^^^^^^^^^^^^
+[36m(ClientAppActor pid=4048355)[0m   File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/ray/_private/serialization.py", line 406, in _deserialize_object
+[36m(ClientAppActor pid=4048355)[0m     return self._deserialize_msgpack_data(
+[36m(ClientAppActor pid=4048355)[0m            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[36m(ClientAppActor pid=4048355)[0m   File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/ray/_private/serialization.py", line 353, in _deserialize_msgpack_data
+[36m(ClientAppActor pid=4048355)[0m     python_objects = self._deserialize_pickle5_data(
+[36m(ClientAppActor pid=4048355)[0m                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[36m(ClientAppActor pid=4048355)[0m   File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/ray/_private/serialization.py", line 335, in _deserialize_pickle5_data
+[36m(ClientAppActor pid=4048355)[0m     obj = pickle.loads(in_band)
+[36m(ClientAppActor pid=4048355)[0m           ^^^^^^^^^^^^^^^^^^^^^
+[36m(ClientAppActor pid=4048355)[0m ModuleNotFoundError: No module named 'redo_by_sara'
+[92mINFO [0m:      fit progress: (1, 3.420815861465147, {'val_score': 1.8495447635650635}, 10.195537417195737)
+[92mINFO [0m:      configure_evaluate: no clients selected, skipping evaluation
+[92mINFO [0m:
+[92mINFO [0m:      [ROUND 2]
+[92mINFO [0m:      configure_fit: strategy sampled 3 clients (out of 3)
+[91mERROR [0m:     Traceback (most recent call last):
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 90, in _submit_job
+    out_mssg, updated_context = self.actor_pool.get_client_result(
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 400, in get_client_result
+    return self._fetch_future_result(cid)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 281, in _fetch_future_result
+    res_cid, out_mssg, updated_context = ray.get(
+                                         ^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/ray/_private/auto_init_hook.py", line 22, in auto_init_wrapper
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/ray/_private/client_mode_hook.py", line 104, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/ray/_private/worker.py", line 2961, in get
+    values, debugger_breakpoint = worker.get_objects(
+                                  ^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/ray/_private/worker.py", line 1026, in get_objects
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(RaySystemError): [36mray::ClientAppActor.run()[39m (pid=4048363, ip=172.17.0.6, actor_id=4ef936150bf61e384fad3d9301000000, repr=<flwr.simulation.ray_transport.ray_actor.ClientAppActor object at 0x784f7a7a7950>)
+  At least one of the input arguments for this task could not be computed:
+ray.exceptions.RaySystemError: System error: No module named 'redo_by_sara'
+traceback: Traceback (most recent call last):
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          ^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'redo_by_sara'
+
+[91mERROR [0m:     [36mray::ClientAppActor.run()[39m (pid=4048363, ip=172.17.0.6, actor_id=4ef936150bf61e384fad3d9301000000, repr=<flwr.simulation.ray_transport.ray_actor.ClientAppActor object at 0x784f7a7a7950>)
+  At least one of the input arguments for this task could not be computed:
+ray.exceptions.RaySystemError: System error: No module named 'redo_by_sara'
+traceback: Traceback (most recent call last):
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          ^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'redo_by_sara'
+[91mERROR [0m:     Traceback (most recent call last):
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 90, in _submit_job
+    out_mssg, updated_context = self.actor_pool.get_client_result(
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 400, in get_client_result
+    return self._fetch_future_result(cid)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 281, in _fetch_future_result
+    res_cid, out_mssg, updated_context = ray.get(
+                                         ^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/ray/_private/auto_init_hook.py", line 22, in auto_init_wrapper
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/ray/_private/client_mode_hook.py", line 104, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/ray/_private/worker.py", line 2961, in get
+    values, debugger_breakpoint = worker.get_objects(
+                                  ^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/ray/_private/worker.py", line 1026, in get_objects
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(RaySystemError): [36mray::ClientAppActor.run()[39m (pid=4048362, ip=172.17.0.6, actor_id=2d06653740c4d1d53788d22c01000000, repr=<flwr.simulation.ray_transport.ray_actor.ClientAppActor object at 0x7975d77ec7d0>)
+  At least one of the input arguments for this task could not be computed:
+ray.exceptions.RaySystemError: System error: No module named 'redo_by_sara'
+traceback: Traceback (most recent call last):
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          ^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'redo_by_sara'
+
+[91mERROR [0m:     [36mray::ClientAppActor.run()[39m (pid=4048362, ip=172.17.0.6, actor_id=2d06653740c4d1d53788d22c01000000, repr=<flwr.simulation.ray_transport.ray_actor.ClientAppActor object at 0x7975d77ec7d0>)
+  At least one of the input arguments for this task could not be computed:
+ray.exceptions.RaySystemError: System error: No module named 'redo_by_sara'
+traceback: Traceback (most recent call last):
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          ^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'redo_by_sara'
+[91mERROR [0m:     Traceback (most recent call last):
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 90, in _submit_job
+    out_mssg, updated_context = self.actor_pool.get_client_result(
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 400, in get_client_result
+    return self._fetch_future_result(cid)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 281, in _fetch_future_result
+    res_cid, out_mssg, updated_context = ray.get(
+                                         ^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/ray/_private/auto_init_hook.py", line 22, in auto_init_wrapper
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/ray/_private/client_mode_hook.py", line 104, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/ray/_private/worker.py", line 2961, in get
+    values, debugger_breakpoint = worker.get_objects(
+                                  ^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/ray/_private/worker.py", line 1026, in get_objects
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(RaySystemError): [36mray::ClientAppActor.run()[39m (pid=4048355, ip=172.17.0.6, actor_id=9b8f0467fc114f295505921501000000, repr=<flwr.simulation.ray_transport.ray_actor.ClientAppActor object at 0x7f14f7fba550>)
+  At least one of the input arguments for this task could not be computed:
+ray.exceptions.RaySystemError: System error: No module named 'redo_by_sara'
+traceback: Traceback (most recent call last):
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          ^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'redo_by_sara'
+
+[91mERROR [0m:     [36mray::ClientAppActor.run()[39m (pid=4048355, ip=172.17.0.6, actor_id=9b8f0467fc114f295505921501000000, repr=<flwr.simulation.ray_transport.ray_actor.ClientAppActor object at 0x7f14f7fba550>)
+  At least one of the input arguments for this task could not be computed:
+ray.exceptions.RaySystemError: System error: No module named 'redo_by_sara'
+traceback: Traceback (most recent call last):
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          ^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'redo_by_sara'
+[92mINFO [0m:      aggregate_fit: received 0 results and 3 failures
+[92mINFO [0m:      fit progress: (2, 3.420815861465147, {'val_score': 1.8495447635650635}, 10.506610305979848)
+[92mINFO [0m:      configure_evaluate: no clients selected, skipping evaluation
+[92mINFO [0m:
+[92mINFO [0m:      [ROUND 3]
+[92mINFO [0m:      configure_fit: strategy sampled 3 clients (out of 3)
+[91mERROR [0m:     Traceback (most recent call last):
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 90, in _submit_job
+    out_mssg, updated_context = self.actor_pool.get_client_result(
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 400, in get_client_result
+    return self._fetch_future_result(cid)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 281, in _fetch_future_result
+    res_cid, out_mssg, updated_context = ray.get(
+                                         ^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/ray/_private/auto_init_hook.py", line 22, in auto_init_wrapper
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/ray/_private/client_mode_hook.py", line 104, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/ray/_private/worker.py", line 2961, in get
+    values, debugger_breakpoint = worker.get_objects(
+                                  ^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/ray/_private/worker.py", line 1026, in get_objects
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(RaySystemError): [36mray::ClientAppActor.run()[39m (pid=4048355, ip=172.17.0.6, actor_id=9b8f0467fc114f295505921501000000, repr=<flwr.simulation.ray_transport.ray_actor.ClientAppActor object at 0x7f14f7fba550>)
+  At least one of the input arguments for this task could not be computed:
+ray.exceptions.RaySystemError: System error: No module named 'redo_by_sara'
+traceback: Traceback (most recent call last):
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          ^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'redo_by_sara'
+
+[91mERROR [0m:     [36mray::ClientAppActor.run()[39m (pid=4048355, ip=172.17.0.6, actor_id=9b8f0467fc114f295505921501000000, repr=<flwr.simulation.ray_transport.ray_actor.ClientAppActor object at 0x7f14f7fba550>)
+  At least one of the input arguments for this task could not be computed:
+ray.exceptions.RaySystemError: System error: No module named 'redo_by_sara'
+traceback: Traceback (most recent call last):
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          ^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'redo_by_sara'
+[91mERROR [0m:     Traceback (most recent call last):
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 90, in _submit_job
+    out_mssg, updated_context = self.actor_pool.get_client_result(
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 400, in get_client_result
+    return self._fetch_future_result(cid)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 281, in _fetch_future_result
+    res_cid, out_mssg, updated_context = ray.get(
+                                         ^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/ray/_private/auto_init_hook.py", line 22, in auto_init_wrapper
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/ray/_private/client_mode_hook.py", line 104, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/ray/_private/worker.py", line 2961, in get
+    values, debugger_breakpoint = worker.get_objects(
+                                  ^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/ray/_private/worker.py", line 1026, in get_objects
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(RaySystemError): [36mray::ClientAppActor.run()[39m (pid=4048362, ip=172.17.0.6, actor_id=2d06653740c4d1d53788d22c01000000, repr=<flwr.simulation.ray_transport.ray_actor.ClientAppActor object at 0x7975d77ec7d0>)
+  At least one of the input arguments for this task could not be computed:
+ray.exceptions.RaySystemError: System error: No module named 'redo_by_sara'
+traceback: Traceback (most recent call last):
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          ^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'redo_by_sara'
+
+[91mERROR [0m:     [36mray::ClientAppActor.run()[39m (pid=4048362, ip=172.17.0.6, actor_id=2d06653740c4d1d53788d22c01000000, repr=<flwr.simulation.ray_transport.ray_actor.ClientAppActor object at 0x7975d77ec7d0>)
+  At least one of the input arguments for this task could not be computed:
+ray.exceptions.RaySystemError: System error: No module named 'redo_by_sara'
+traceback: Traceback (most recent call last):
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          ^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'redo_by_sara'
+[91mERROR [0m:     Traceback (most recent call last):
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 90, in _submit_job
+    out_mssg, updated_context = self.actor_pool.get_client_result(
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 400, in get_client_result
+    return self._fetch_future_result(cid)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 281, in _fetch_future_result
+    res_cid, out_mssg, updated_context = ray.get(
+                                         ^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/ray/_private/auto_init_hook.py", line 22, in auto_init_wrapper
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/ray/_private/client_mode_hook.py", line 104, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/ray/_private/worker.py", line 2961, in get
+    values, debugger_breakpoint = worker.get_objects(
+                                  ^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/ray/_private/worker.py", line 1026, in get_objects
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(RaySystemError): [36mray::ClientAppActor.run()[39m (pid=4048363, ip=172.17.0.6, actor_id=4ef936150bf61e384fad3d9301000000, repr=<flwr.simulation.ray_transport.ray_actor.ClientAppActor object at 0x784f7a7a7950>)
+  At least one of the input arguments for this task could not be computed:
+ray.exceptions.RaySystemError: System error: No module named 'redo_by_sara'
+traceback: Traceback (most recent call last):
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          ^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'redo_by_sara'
+
+[91mERROR [0m:     [36mray::ClientAppActor.run()[39m (pid=4048363, ip=172.17.0.6, actor_id=4ef936150bf61e384fad3d9301000000, repr=<flwr.simulation.ray_transport.ray_actor.ClientAppActor object at 0x784f7a7a7950>)
+  At least one of the input arguments for this task could not be computed:
+ray.exceptions.RaySystemError: System error: No module named 'redo_by_sara'
+traceback: Traceback (most recent call last):
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          ^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'redo_by_sara'
+[92mINFO [0m:      aggregate_fit: received 0 results and 3 failures
+[92mINFO [0m:      fit progress: (3, 3.420815861465147, {'val_score': 1.8495447635650635}, 10.768326509743929)
+[92mINFO [0m:      configure_evaluate: no clients selected, skipping evaluation
+[92mINFO [0m:
+[92mINFO [0m:      [ROUND 4]
+[92mINFO [0m:      configure_fit: strategy sampled 3 clients (out of 3)
+[91mERROR [0m:     Traceback (most recent call last):
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 90, in _submit_job
+    out_mssg, updated_context = self.actor_pool.get_client_result(
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 400, in get_client_result
+    return self._fetch_future_result(cid)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 281, in _fetch_future_result
+    res_cid, out_mssg, updated_context = ray.get(
+                                         ^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/ray/_private/auto_init_hook.py", line 22, in auto_init_wrapper
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/ray/_private/client_mode_hook.py", line 104, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/ray/_private/worker.py", line 2961, in get
+    values, debugger_breakpoint = worker.get_objects(
+                                  ^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/ray/_private/worker.py", line 1026, in get_objects
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(RaySystemError): [36mray::ClientAppActor.run()[39m (pid=4048363, ip=172.17.0.6, actor_id=4ef936150bf61e384fad3d9301000000, repr=<flwr.simulation.ray_transport.ray_actor.ClientAppActor object at 0x784f7a7a7950>)
+  At least one of the input arguments for this task could not be computed:
+ray.exceptions.RaySystemError: System error: No module named 'redo_by_sara'
+traceback: Traceback (most recent call last):
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          ^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'redo_by_sara'
+
+[91mERROR [0m:     [36mray::ClientAppActor.run()[39m (pid=4048363, ip=172.17.0.6, actor_id=4ef936150bf61e384fad3d9301000000, repr=<flwr.simulation.ray_transport.ray_actor.ClientAppActor object at 0x784f7a7a7950>)
+  At least one of the input arguments for this task could not be computed:
+ray.exceptions.RaySystemError: System error: No module named 'redo_by_sara'
+traceback: Traceback (most recent call last):
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          ^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'redo_by_sara'
+[91mERROR [0m:     Traceback (most recent call last):
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 90, in _submit_job
+    out_mssg, updated_context = self.actor_pool.get_client_result(
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 400, in get_client_result
+    return self._fetch_future_result(cid)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 281, in _fetch_future_result
+    res_cid, out_mssg, updated_context = ray.get(
+                                         ^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/ray/_private/auto_init_hook.py", line 22, in auto_init_wrapper
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/ray/_private/client_mode_hook.py", line 104, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/ray/_private/worker.py", line 2961, in get
+    values, debugger_breakpoint = worker.get_objects(
+                                  ^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/ray/_private/worker.py", line 1026, in get_objects
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(RaySystemError): [36mray::ClientAppActor.run()[39m (pid=4048362, ip=172.17.0.6, actor_id=2d06653740c4d1d53788d22c01000000, repr=<flwr.simulation.ray_transport.ray_actor.ClientAppActor object at 0x7975d77ec7d0>)
+  At least one of the input arguments for this task could not be computed:
+ray.exceptions.RaySystemError: System error: No module named 'redo_by_sara'
+traceback: Traceback (most recent call last):
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          ^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'redo_by_sara'
+
+[91mERROR [0m:     [36mray::ClientAppActor.run()[39m (pid=4048362, ip=172.17.0.6, actor_id=2d06653740c4d1d53788d22c01000000, repr=<flwr.simulation.ray_transport.ray_actor.ClientAppActor object at 0x7975d77ec7d0>)
+  At least one of the input arguments for this task could not be computed:
+ray.exceptions.RaySystemError: System error: No module named 'redo_by_sara'
+traceback: Traceback (most recent call last):
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          ^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'redo_by_sara'
+[91mERROR [0m:     Traceback (most recent call last):
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 90, in _submit_job
+    out_mssg, updated_context = self.actor_pool.get_client_result(
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 400, in get_client_result
+    return self._fetch_future_result(cid)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 281, in _fetch_future_result
+    res_cid, out_mssg, updated_context = ray.get(
+                                         ^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/ray/_private/auto_init_hook.py", line 22, in auto_init_wrapper
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/ray/_private/client_mode_hook.py", line 104, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/ray/_private/worker.py", line 2961, in get
+    values, debugger_breakpoint = worker.get_objects(
+                                  ^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/ray/_private/worker.py", line 1026, in get_objects
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(RaySystemError): [36mray::ClientAppActor.run()[39m (pid=4048355, ip=172.17.0.6, actor_id=9b8f0467fc114f295505921501000000, repr=<flwr.simulation.ray_transport.ray_actor.ClientAppActor object at 0x7f14f7fba550>)
+  At least one of the input arguments for this task could not be computed:
+ray.exceptions.RaySystemError: System error: No module named 'redo_by_sara'
+traceback: Traceback (most recent call last):
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          ^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'redo_by_sara'
+
+[91mERROR [0m:     [36mray::ClientAppActor.run()[39m (pid=4048355, ip=172.17.0.6, actor_id=9b8f0467fc114f295505921501000000, repr=<flwr.simulation.ray_transport.ray_actor.ClientAppActor object at 0x7f14f7fba550>)
+  At least one of the input arguments for this task could not be computed:
+ray.exceptions.RaySystemError: System error: No module named 'redo_by_sara'
+traceback: Traceback (most recent call last):
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          ^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'redo_by_sara'
+[92mINFO [0m:      aggregate_fit: received 0 results and 3 failures
+[36m(pid=gcs_server)[0m [2026-04-24 08:43:49,675 E 4047834 4047834] (gcs_server) gcs_server.cc:302: Failed to establish connection to the event+metrics exporter agent. Events and metrics will not be exported. Exporter agent status: RpcError: Running out of retries to initialize the metrics agent. rpc_code: 14
+[92mINFO [0m:      fit progress: (4, 3.420815861465147, {'val_score': 1.8495447635650635}, 11.054935490712523)
+[92mINFO [0m:      configure_evaluate: no clients selected, skipping evaluation
+[92mINFO [0m:
+[92mINFO [0m:      [ROUND 5]
+[92mINFO [0m:      configure_fit: strategy sampled 3 clients (out of 3)
+[91mERROR [0m:     Traceback (most recent call last):
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 90, in _submit_job
+    out_mssg, updated_context = self.actor_pool.get_client_result(
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 400, in get_client_result
+    return self._fetch_future_result(cid)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 281, in _fetch_future_result
+    res_cid, out_mssg, updated_context = ray.get(
+                                         ^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/ray/_private/auto_init_hook.py", line 22, in auto_init_wrapper
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/ray/_private/client_mode_hook.py", line 104, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/ray/_private/worker.py", line 2961, in get
+    values, debugger_breakpoint = worker.get_objects(
+                                  ^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/ray/_private/worker.py", line 1026, in get_objects
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(RaySystemError): [36mray::ClientAppActor.run()[39m (pid=4048355, ip=172.17.0.6, actor_id=9b8f0467fc114f295505921501000000, repr=<flwr.simulation.ray_transport.ray_actor.ClientAppActor object at 0x7f14f7fba550>)
+  At least one of the input arguments for this task could not be computed:
+ray.exceptions.RaySystemError: System error: No module named 'redo_by_sara'
+traceback: Traceback (most recent call last):
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          ^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'redo_by_sara'
+
+[91mERROR [0m:     [36mray::ClientAppActor.run()[39m (pid=4048355, ip=172.17.0.6, actor_id=9b8f0467fc114f295505921501000000, repr=<flwr.simulation.ray_transport.ray_actor.ClientAppActor object at 0x7f14f7fba550>)
+  At least one of the input arguments for this task could not be computed:
+ray.exceptions.RaySystemError: System error: No module named 'redo_by_sara'
+traceback: Traceback (most recent call last):
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          ^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'redo_by_sara'
+[91mERROR [0m:     Traceback (most recent call last):
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 90, in _submit_job
+    out_mssg, updated_context = self.actor_pool.get_client_result(
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 400, in get_client_result
+    return self._fetch_future_result(cid)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 281, in _fetch_future_result
+    res_cid, out_mssg, updated_context = ray.get(
+                                         ^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/ray/_private/auto_init_hook.py", line 22, in auto_init_wrapper
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/ray/_private/client_mode_hook.py", line 104, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/ray/_private/worker.py", line 2961, in get
+    values, debugger_breakpoint = worker.get_objects(
+                                  ^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/ray/_private/worker.py", line 1026, in get_objects
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(RaySystemError): [36mray::ClientAppActor.run()[39m (pid=4048362, ip=172.17.0.6, actor_id=2d06653740c4d1d53788d22c01000000, repr=<flwr.simulation.ray_transport.ray_actor.ClientAppActor object at 0x7975d77ec7d0>)
+  At least one of the input arguments for this task could not be computed:
+ray.exceptions.RaySystemError: System error: No module named 'redo_by_sara'
+traceback: Traceback (most recent call last):
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          ^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'redo_by_sara'
+
+[91mERROR [0m:     [36mray::ClientAppActor.run()[39m (pid=4048362, ip=172.17.0.6, actor_id=2d06653740c4d1d53788d22c01000000, repr=<flwr.simulation.ray_transport.ray_actor.ClientAppActor object at 0x7975d77ec7d0>)
+  At least one of the input arguments for this task could not be computed:
+ray.exceptions.RaySystemError: System error: No module named 'redo_by_sara'
+traceback: Traceback (most recent call last):
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          ^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'redo_by_sara'
+[91mERROR [0m:     Traceback (most recent call last):
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 90, in _submit_job
+    out_mssg, updated_context = self.actor_pool.get_client_result(
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 400, in get_client_result
+    return self._fetch_future_result(cid)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 281, in _fetch_future_result
+    res_cid, out_mssg, updated_context = ray.get(
+                                         ^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/ray/_private/auto_init_hook.py", line 22, in auto_init_wrapper
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/ray/_private/client_mode_hook.py", line 104, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/ray/_private/worker.py", line 2961, in get
+    values, debugger_breakpoint = worker.get_objects(
+                                  ^^^^^^^^^^^^^^^^^^^
+  File "/home/coder/conda/envs/torch311/lib/python3.11/site-packages/ray/_private/worker.py", line 1026, in get_objects
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(RaySystemError): [36mray::ClientAppActor.run()[39m (pid=4048363, ip=172.17.0.6, actor_id=4ef936150bf61e384fad3d9301000000, repr=<flwr.simulation.ray_transport.ray_actor.ClientAppActor object at 0x784f7a7a7950>)
+  At least one of the input arguments for this task could not be computed:
+ray.exceptions.RaySystemError: System error: No module named 'redo_by_sara'
+traceback: Traceback (most recent call last):
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          ^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'redo_by_sara'
+
+[91mERROR [0m:     [36mray::ClientAppActor.run()[39m (pid=4048363, ip=172.17.0.6, actor_id=4ef936150bf61e384fad3d9301000000, repr=<flwr.simulation.ray_transport.ray_actor.ClientAppActor object at 0x784f7a7a7950>)
+  At least one of the input arguments for this task could not be computed:
+ray.exceptions.RaySystemError: System error: No module named 'redo_by_sara'
+traceback: Traceback (most recent call last):
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          ^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'redo_by_sara'
+[92mINFO [0m:      aggregate_fit: received 0 results and 3 failures
+[92mINFO [0m:      fit progress: (5, 3.420815861465147, {'val_score': 1.8495447635650635}, 11.389424245804548)
+[92mINFO [0m:      configure_evaluate: no clients selected, skipping evaluation
+[92mINFO [0m:
+[92mINFO [0m:      [SUMMARY]
+[92mINFO [0m:      Run finished 5 round(s) in 11.40s
+[92mINFO [0m:      	History (loss, centralized):
+[92mINFO [0m:      		round 0: 3.420815861465147
+[92mINFO [0m:      		round 1: 3.420815861465147
+[92mINFO [0m:      		round 2: 3.420815861465147
+[92mINFO [0m:      		round 3: 3.420815861465147
+[92mINFO [0m:      		round 4: 3.420815861465147
+[92mINFO [0m:      		round 5: 3.420815861465147
+[92mINFO [0m:      	History (metrics, centralized):
+[92mINFO [0m:      	{'val_score': [(0, 1.8495447635650635),
+[92mINFO [0m:      	               (1, 1.8495447635650635),
+[92mINFO [0m:      	               (2, 1.8495447635650635),
+[92mINFO [0m:      	               (3, 1.8495447635650635),
+[92mINFO [0m:      	               (4, 1.8495447635650635),
+[92mINFO [0m:      	               (5, 1.8495447635650635)]}
+[92mINFO [0m:
+{
+  "task": "regression",
+  "model_path": "/home/coder/workspace/shake/redo-by-sara/artifacts/regression_flower_model.pt",
+  "history_path": "/home/coder/workspace/shake/redo-by-sara/artifacts/regression_federated_history.csv",
+  "partition_summary_path": "/home/coder/workspace/shake/redo-by-sara/artifacts/regression_federated_partitions.json",
+  "num_clients": 3,
+  "num_rounds": 5,
+  "local_epochs": 1,
+  "best_val_round": 0,
+  "best_val_loss": 3.420815861465147,
+  "best_val_score": 1.8495447635650635,
+  "test_loss": 2.904716667712935,
+  "test_score": 1.7043229341506958
+}

@@ -1,0 +1,15 @@
+{
+  "task": "regression",
+  "partition_mode": "iid_by_subject_full_train_runs",
+  "model_path": "/home/coder/workspace/ENGR859-final-project/artifacts/regression_iid_flower_model.pt",
+  "history_path": "/home/coder/workspace/ENGR859-final-project/artifacts/regression_iid_federated_history.csv",
+  "partition_summary_path": "/home/coder/workspace/ENGR859-final-project/artifacts/regression_iid_federated_partitions.json",
+  "num_clients": 3,
+  "num_rounds": 5,
+  "local_epochs": 1,
+  "best_val_round": 2,
+  "best_val_loss": 0.03628689167246023,
+  "best_val_score": 0.190491184592247,
+  "test_loss": 0.044205514420348924,
+  "test_score": 0.2102510780096054
+}

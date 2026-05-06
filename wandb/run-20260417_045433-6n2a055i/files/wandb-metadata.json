@@ -1,0 +1,44 @@
+{
+  "os": "Linux-6.17.0-14-generic-x86_64-with-glibc2.35",
+  "python": "CPython 3.11.15",
+  "startedAt": "2026-04-17T04:54:33.779461Z",
+  "args": [
+    "--config",
+    "configs/regression.yaml"
+  ],
+  "program": "/home/coder/workspace/shake/redo-by-sara/scripts/train_baseline.py",
+  "codePath": "redo-by-sara/scripts/train_baseline.py",
+  "codePathLocal": "scripts/train_baseline.py",
+  "git": {
+    "remote": "https://github.com/iamtheeel/shake.git",
+    "commit": "e65f5732792e8090dfd37583af27743d71eecc5a"
+  },
+  "email": "smeschi@sfsu.edu",
+  "root": "/home/coder/workspace/shake/redo-by-sara",
+  "host": "sara-pytorch",
+  "executable": "/home/coder/conda/envs/torch311/bin/python",
+  "cpu_count": 16,
+  "cpu_count_logical": 24,
+  "gpu": "NVIDIA GeForce RTX 3080 Ti",
+  "gpu_count": 1,
+  "disk": {
+    "/": {
+      "total": "1005867986944",
+      "used": "868672724992"
+    }
+  },
+  "memory": {
+    "total": "67200548864"
+  },
+  "gpu_nvidia": [
+    {
+      "name": "NVIDIA GeForce RTX 3080 Ti",
+      "memoryTotal": "12884901888",
+      "cudaCores": 10240,
+      "architecture": "Ampere",
+      "uuid": "GPU-51fc4996-2e7c-d848-b976-5825cc2266fd"
+    }
+  ],
+  "cudaVersion": "12.8",
+  "writerId": "m3pay3q02a33we7v2mshx9xqap5iasqh"
+}

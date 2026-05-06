@@ -1,0 +1,19 @@
+{"time":"2026-04-17T15:29:37.493336436Z","level":"INFO","msg":"wandb-core"}
+{"time":"2026-04-17T15:29:37.49793491Z","level":"INFO","msg":"stream: starting","core version":"0.26.0"}
+{"time":"2026-04-17T15:29:37.859049235Z","level":"INFO","msg":"stream: created new stream","id":"niz4t4w4"}
+{"time":"2026-04-17T15:29:37.859256774Z","level":"INFO","msg":"handler: started"}
+{"time":"2026-04-17T15:29:37.859595408Z","level":"INFO","msg":"stream: started"}
+{"time":"2026-04-17T15:29:37.859865791Z","level":"INFO","msg":"writer: started","stream_id":"niz4t4w4"}
+{"time":"2026-04-17T15:29:37.859911635Z","level":"INFO","msg":"sender: started"}
+{"time":"2026-04-17T15:29:43.996583698Z","level":"INFO","msg":"filestream: sending request","total_files":0,"uploaded_len":1}
+{"time":"2026-04-17T15:29:44.60949658Z","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-04-17T15:29:59.015242332Z","level":"INFO","msg":"filestream: sending request","total_files":3,"history_offset":0,"history_lines":14,"events_offset":0,"events_lines":2,"uploaded_len":1}
+{"time":"2026-04-17T15:30:01.996506657Z","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-04-17T15:30:07.126348055Z","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2026-04-17T15:30:07.131019892Z","level":"INFO","msg":"filestream: sending request","total_files":3,"history_offset":14,"history_lines":2,"console_offset":0,"console_lines":10,"uploaded_len":5,"complete":true,"exit_code":0}
+{"time":"2026-04-17T15:30:11.181028096Z","level":"INFO","msg":"filestream: request sent","status":"200 OK"}
+{"time":"2026-04-17T15:30:11.187774575Z","level":"INFO","msg":"handler: operation stats","stats":{}}
+{"time":"2026-04-17T15:30:11.230152123Z","level":"INFO","msg":"stream: closing"}
+{"time":"2026-04-17T15:30:11.230221634Z","level":"INFO","msg":"handler: closed"}
+{"time":"2026-04-17T15:30:11.230568835Z","level":"INFO","msg":"sender: closed"}
+{"time":"2026-04-17T15:30:11.230615812Z","level":"INFO","msg":"stream: closed"}

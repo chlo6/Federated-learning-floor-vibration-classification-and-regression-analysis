@@ -1,0 +1,49 @@
+{
+  "client_subjects": {
+    "0": [
+      "003",
+      "004"
+    ],
+    "1": [
+      "005",
+      "006"
+    ],
+    "2": [
+      "007",
+      "008"
+    ]
+  },
+  "clients": [
+    {
+      "client_id": "0",
+      "subjects": [
+        "003",
+        "004"
+      ],
+      "num_train_windows": 160,
+      "num_train_runs": 18
+    },
+    {
+      "client_id": "1",
+      "subjects": [
+        "005",
+        "006"
+      ],
+      "num_train_windows": 149,
+      "num_train_runs": 18
+    },
+    {
+      "client_id": "2",
+      "subjects": [
+        "007",
+        "008"
+      ],
+      "num_train_windows": 142,
+      "num_train_runs": 15
+    }
+  ],
+  "num_global_train": 451,
+  "num_global_val": 149,
+  "num_global_test": 149,
+  "split_rule": "Global train/val/test is fixed first by subject+run. Only global train is sharded across clients by subject ownership."
+}

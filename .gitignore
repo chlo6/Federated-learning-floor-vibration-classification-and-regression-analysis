@@ -1,2 +1,6 @@
 *.pt
 artifacts/*.pt
+TestData/
+__pycache__/
+*.pyc
+wandb/

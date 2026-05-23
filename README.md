@@ -1,6 +1,3 @@
-# ENGR859 Final Project
-
-A compact raw-vibration learning pipeline for ENGR 859.
 
 This project focuses on three paths using raw vibration windows only:
 

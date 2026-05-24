@@ -1,0 +1,10 @@
+{
+  "train_mean_speed": 1.4831263907997148,
+  "speed_distribution_plot": "artifacts/regression_diagnostics/regression_r2_5r_1e_run_speed_distribution.png",
+  "run_distribution_csv": "artifacts/regression_diagnostics/regression_r2_5r_1e_run_speed_distribution.csv",
+  "subject_speed_csv": "artifacts/regression_diagnostics/regression_r2_5r_1e_subject_006_speeds.csv",
+  "metrics_csv": "artifacts/regression_diagnostics/regression_r2_5r_1e_baseline_model_metrics.csv",
+  "run_predictions_csv": "artifacts/regression_diagnostics/regression_r2_5r_1e_best-val_run_predictions.csv",
+  "test_run_prediction_plot": "artifacts/regression_diagnostics/regression_r2_5r_1e_best-val_test_run_predictions.png",
+  "subject": "006"
+}

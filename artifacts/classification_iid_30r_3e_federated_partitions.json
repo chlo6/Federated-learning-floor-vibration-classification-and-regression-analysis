@@ -1,0 +1,122 @@
+{
+  "partition_mode": "iid_by_subject_full_train_runs",
+  "client_subjects": {
+    "0": [
+      "003",
+      "004",
+      "005",
+      "006",
+      "007",
+      "008"
+    ],
+    "1": [
+      "003",
+      "004",
+      "005",
+      "006",
+      "007",
+      "008"
+    ],
+    "2": [
+      "003",
+      "004",
+      "005",
+      "006",
+      "007",
+      "008"
+    ]
+  },
+  "clients": [
+    {
+      "client_id": "0",
+      "subjects": [
+        "003",
+        "004",
+        "005",
+        "006",
+        "007",
+        "008"
+      ],
+      "num_train_windows": 149,
+      "num_train_runs": 17,
+      "subject_window_counts": {
+        "003": 29,
+        "004": 25,
+        "005": 25,
+        "006": 23,
+        "007": 27,
+        "008": 20
+      },
+      "subject_run_counts": {
+        "003": 3,
+        "004": 3,
+        "005": 3,
+        "006": 3,
+        "007": 3,
+        "008": 2
+      }
+    },
+    {
+      "client_id": "1",
+      "subjects": [
+        "003",
+        "004",
+        "005",
+        "006",
+        "007",
+        "008"
+      ],
+      "num_train_windows": 144,
+      "num_train_runs": 16,
+      "subject_window_counts": {
+        "003": 29,
+        "004": 25,
+        "005": 26,
+        "006": 25,
+        "007": 19,
+        "008": 20
+      },
+      "subject_run_counts": {
+        "003": 3,
+        "004": 3,
+        "005": 3,
+        "006": 3,
+        "007": 2,
+        "008": 2
+      }
+    },
+    {
+      "client_id": "2",
+      "subjects": [
+        "003",
+        "004",
+        "005",
+        "006",
+        "007",
+        "008"
+      ],
+      "num_train_windows": 158,
+      "num_train_runs": 18,
+      "subject_window_counts": {
+        "003": 27,
+        "004": 25,
+        "005": 33,
+        "006": 17,
+        "007": 27,
+        "008": 29
+      },
+      "subject_run_counts": {
+        "003": 3,
+        "004": 3,
+        "005": 4,
+        "006": 2,
+        "007": 3,
+        "008": 3
+      }
+    }
+  ],
+  "num_global_train": 451,
+  "num_global_val": 149,
+  "num_global_test": 149,
+  "split_rule": "Global train/val/test remains fixed by subject+run. Only global train is distributed to clients. For each subject, whole training runs are assigned to clients so every client sees every subject while overlapping windows from the same run stay on one client."
+}

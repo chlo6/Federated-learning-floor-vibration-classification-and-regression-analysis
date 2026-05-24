@@ -23,6 +23,7 @@ from redo_by_sara.federated import (
     create_federated_model,
     evaluate_model,
     get_parameters,
+    regression_r2_score,
     save_partition_summary,
     save_round_history,
     set_parameters,
@@ -61,6 +62,7 @@ def _build_wandb_config(
         "num_clients": federated.num_clients,
         "num_rounds": federated.num_rounds,
         "local_epochs": federated.local_epochs,
+        "result_name": federated.result_name,
         "client_subjects": client_subjects,
     }
 
@@ -72,7 +74,8 @@ def _build_run_name(config: ExperimentConfig) -> str:
     timestamp = datetime.utcnow().strftime("%Y%m%d-%H%M%S")
     return (
         f"{config.training.task}-flower-iid-"
-        f"{federated.num_clients}c-{federated.num_rounds}r-{timestamp}"
+        f"{federated.num_clients}c-{federated.num_rounds}r-"
+        f"{federated.result_name + '-' if federated.result_name else ''}{timestamp}"
     )
 
 
@@ -109,7 +112,7 @@ def _aggregate_fit_metrics(metrics: list[tuple[int, dict[str, float]]]) -> dict[
         return {}
 
     aggregated: dict[str, float] = {}
-    for key in ("train_loss", "train_score"):
+    for key in ("train_loss", "train_score", "train_r2"):
         weighted_sum = 0.0
         contributed = False
         for num_examples, client_metrics in metrics:
@@ -152,6 +155,14 @@ def _client_id_from_context(client_context: Any) -> str:
     )
 
 
+def _result_stem(config: ExperimentConfig) -> str:
+    federated = config.federated
+    if federated is None:
+        raise ValueError("Missing federated config.")
+    suffix = f"_{federated.result_name}" if federated.result_name else ""
+    return f"{config.training.task}_iid{suffix}"
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run an IID Flower simulation.")
     parser.add_argument("--config", required=True, help="Path to YAML config file.")
@@ -185,10 +196,14 @@ def main() -> None:
         client_subjects=client_subjects,
     )
 
-    partition_summary_path = config.output_dir / f"{config.training.task}_iid_federated_partitions.json"
-    history_path = config.output_dir / f"{config.training.task}_iid_federated_history.csv"
-    summary_path = config.output_dir / f"{config.training.task}_iid_federated_summary.json"
-    model_path = config.output_dir / f"{config.training.task}_iid_flower_model.pt"
+    result_stem = _result_stem(config)
+    partition_summary_path = config.output_dir / f"{result_stem}_federated_partitions.json"
+    history_path = config.output_dir / f"{result_stem}_federated_history.csv"
+    client_history_path = config.output_dir / f"{result_stem}_federated_client_history.csv"
+    summary_path = config.output_dir / f"{result_stem}_federated_summary.json"
+    model_path = config.output_dir / f"{result_stem}_flower_model.pt"
+    best_model_path = config.output_dir / f"{result_stem}_best_val_flower_model.pt"
+    checkpoint_dir = config.output_dir / "round_checkpoints" / result_stem
     save_partition_summary(partition_summary_path, partition_summary)
 
     run = _init_wandb(config, artifact, client_subjects)
@@ -242,10 +257,14 @@ def main() -> None:
                 learning_rate=self.experiment.training.learning_rate,
                 weight_decay=self.experiment.training.weight_decay,
             )
-            return get_parameters(model), len(self.partition.train_indices), {
+            metrics = {
+                "client_id": self.partition.client_id,
                 "train_loss": float(train_result.loss),
                 "train_score": float(train_result.score),
             }
+            if self.task == "regression":
+                metrics["train_r2"] = float(regression_r2_score(train_result.outputs, train_result.targets))
+            return get_parameters(model), len(self.partition.train_indices), metrics
 
         def evaluate(
             self,
@@ -269,22 +288,29 @@ def main() -> None:
     def evaluate_fn(server_round: int, parameters: Any, _: dict[str, Any]) -> tuple[float, dict[str, float]]:
         model = create_federated_model(artifact, config.training.task).to(server_device)
         set_parameters(model, _coerce_ndarrays(parameters, parameters_to_ndarrays))
+        checkpoint_dir.mkdir(parents=True, exist_ok=True)
+        torch.save(
+            model.state_dict(),
+            checkpoint_dir / f"{result_stem}_round_{server_round:03d}.pt",
+        )
         result = evaluate_model(model=model, loader=val_loader, task=config.training.task, device=server_device)
         row = {
             "round": float(server_round),
             "val_loss": float(result.loss),
             "val_score": float(result.score),
         }
+        if config.training.task == "regression":
+            row["val_r2"] = float(regression_r2_score(result.outputs, result.targets))
         eval_rows.append(row)
         if run is not None:
-            wandb.log(
-                {
-                    "federated/round": server_round,
-                    "federated/val_loss": result.loss,
-                    "federated/val_score": result.score,
-                },
-                step=server_round,
-            )
+            log_payload = {
+                "federated/round": server_round,
+                "federated/val_loss": result.loss,
+                "federated/val_score": result.score,
+            }
+            if "val_r2" in row:
+                log_payload["federated/val_r2"] = row["val_r2"]
+            wandb.log(log_payload, step=server_round)
         return float(result.loss), {"val_score": float(result.score)}
 
     class TrackingFedAvg(FedAvg):
@@ -292,27 +318,56 @@ def main() -> None:
             super().__init__(*args, **kwargs)
             self.latest_parameters = kwargs.get("initial_parameters")
             self.fit_rows: list[dict[str, float]] = []
+            self.client_rows: list[dict[str, float | str]] = []
 
         def aggregate_fit(self, server_round: int, results: Any, failures: Any) -> tuple[Any, dict[str, float]]:
             aggregated_parameters, aggregated_metrics = super().aggregate_fit(server_round, results, failures)
             if aggregated_parameters is not None:
                 self.latest_parameters = aggregated_parameters
 
+            for _, fit_result in results:
+                metrics = getattr(fit_result, "metrics", {}) or {}
+                client_id = str(metrics.get("client_id", "unknown"))
+                client_row: dict[str, float | str] = {
+                    "round": float(server_round),
+                    "client_id": client_id,
+                    "num_examples": float(getattr(fit_result, "num_examples", 0)),
+                }
+                if "train_loss" in metrics:
+                    client_row["train_loss"] = float(metrics["train_loss"])
+                if "train_score" in metrics:
+                    client_row["train_score"] = float(metrics["train_score"])
+                if "train_r2" in metrics:
+                    client_row["train_r2"] = float(metrics["train_r2"])
+                self.client_rows.append(client_row)
+
+                if run is not None:
+                    client_payload = {
+                        f"clients/{client_id}/train_loss": client_row.get("train_loss"),
+                        f"clients/{client_id}/train_score": client_row.get("train_score"),
+                        f"clients/{client_id}/num_examples": client_row["num_examples"],
+                    }
+                    if "train_r2" in client_row:
+                        client_payload[f"clients/{client_id}/train_r2"] = client_row["train_r2"]
+                    wandb.log(client_payload, step=server_round)
+
             row = {"round": float(server_round)}
             if "train_loss" in aggregated_metrics:
                 row["train_loss"] = float(aggregated_metrics["train_loss"])
             if "train_score" in aggregated_metrics:
                 row["train_score"] = float(aggregated_metrics["train_score"])
+            if "train_r2" in aggregated_metrics:
+                row["train_r2"] = float(aggregated_metrics["train_r2"])
             self.fit_rows.append(row)
 
             if run is not None and len(row) > 1:
-                wandb.log(
-                    {
-                        "federated/train_loss": row.get("train_loss"),
-                        "federated/train_score": row.get("train_score"),
-                    },
-                    step=server_round,
-                )
+                fit_payload = {
+                    "federated/train_loss": row.get("train_loss"),
+                    "federated/train_score": row.get("train_score"),
+                }
+                if "train_r2" in row:
+                    fit_payload["federated/train_r2"] = row["train_r2"]
+                wandb.log(fit_payload, step=server_round)
             return aggregated_parameters, aggregated_metrics
 
     initial_model = create_federated_model(artifact, config.training.task)
@@ -380,6 +435,7 @@ def main() -> None:
 
         round_rows = _merge_round_rows(strategy.fit_rows, eval_rows)
         save_round_history(history_path, round_rows)
+        save_round_history(client_history_path, strategy.client_rows)
         model_path.parent.mkdir(parents=True, exist_ok=True)
         torch.save(final_model.state_dict(), model_path)
 
@@ -388,20 +444,54 @@ def main() -> None:
             if config.training.task == "regression"
             else max(eval_rows, key=lambda row: row["val_score"])
         )
+        best_val_round = int(best_val_row["round"])
+        best_checkpoint_path = checkpoint_dir / f"{result_stem}_round_{best_val_round:03d}.pt"
+        best_model = create_federated_model(artifact, config.training.task).to(server_device)
+        best_model.load_state_dict(torch.load(best_checkpoint_path, map_location=server_device, weights_only=False))
+        best_test_result = evaluate_model(
+            model=best_model,
+            loader=test_loader,
+            task=config.training.task,
+            device=server_device,
+        )
+        torch.save(best_model.state_dict(), best_model_path)
+        test_r2 = (
+            float(regression_r2_score(best_test_result.outputs, best_test_result.targets))
+            if config.training.task == "regression"
+            else None
+        )
+        final_test_r2 = (
+            float(regression_r2_score(test_result.outputs, test_result.targets))
+            if config.training.task == "regression"
+            else None
+        )
+
         summary = {
             "task": config.training.task,
             "partition_mode": "iid_by_subject_full_train_runs",
+            "result_name": config.federated.result_name,
             "model_path": str(model_path),
+            "best_model_path": str(best_model_path),
+            "checkpoint_dir": str(checkpoint_dir),
             "history_path": str(history_path),
+            "client_history_path": str(client_history_path),
             "partition_summary_path": str(partition_summary_path),
             "num_clients": config.federated.num_clients,
             "num_rounds": config.federated.num_rounds,
             "local_epochs": config.federated.local_epochs,
-            "best_val_round": int(best_val_row["round"]),
+            "best_val_round": best_val_round,
             "best_val_loss": float(best_val_row["val_loss"]),
             "best_val_score": float(best_val_row["val_score"]),
-            "test_loss": float(test_result.loss),
-            "test_score": float(test_result.score),
+            "best_val_r2": None if "val_r2" not in best_val_row else float(best_val_row["val_r2"]),
+            "test_model": "best_validation",
+            "test_round": best_val_round,
+            "test_loss": float(best_test_result.loss),
+            "test_score": float(best_test_result.score),
+            "test_r2": test_r2,
+            "final_round": config.federated.num_rounds,
+            "final_test_loss": float(test_result.loss),
+            "final_test_score": float(test_result.score),
+            "final_test_r2": final_test_r2,
         }
         summary_path.write_text(json.dumps(summary, indent=2))
 
@@ -413,6 +503,11 @@ def main() -> None:
                     "best_val_round": summary["best_val_round"],
                     "best_val_loss": summary["best_val_loss"],
                     "best_val_score": summary["best_val_score"],
+                    "best_val_r2": summary["best_val_r2"],
+                    "test_r2": summary["test_r2"],
+                    "final_test_loss": summary["final_test_loss"],
+                    "final_test_score": summary["final_test_score"],
+                    "final_test_r2": summary["final_test_r2"],
                 },
                 step=config.federated.num_rounds,
             )

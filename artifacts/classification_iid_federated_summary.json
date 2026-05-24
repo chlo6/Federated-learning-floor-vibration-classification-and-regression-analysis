@@ -2,14 +2,16 @@
   "task": "classification",
   "partition_mode": "iid_by_subject_full_train_runs",
   "model_path": "/home/coder/workspace/ENGR859-final-project/artifacts/classification_iid_flower_model.pt",
+  "checkpoint_dir": "/home/coder/workspace/ENGR859-final-project/artifacts/round_checkpoints",
   "history_path": "/home/coder/workspace/ENGR859-final-project/artifacts/classification_iid_federated_history.csv",
+  "client_history_path": "/home/coder/workspace/ENGR859-final-project/artifacts/classification_iid_federated_client_history.csv",
   "partition_summary_path": "/home/coder/workspace/ENGR859-final-project/artifacts/classification_iid_federated_partitions.json",
   "num_clients": 3,
   "num_rounds": 15,
   "local_epochs": 3,
   "best_val_round": 15,
-  "best_val_loss": 0.3090975593350478,
-  "best_val_score": 0.9060402512550354,
-  "test_loss": 0.3773361919010246,
-  "test_score": 0.7785235047340393
+  "best_val_loss": 0.41110489124919747,
+  "best_val_score": 0.899328887462616,
+  "test_loss": 0.315138859436816,
+  "test_score": 0.9463087320327759
 }

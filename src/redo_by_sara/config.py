@@ -50,6 +50,7 @@ class FederatedConfig:
     client_num_cpus: float = 1.0
     client_num_gpus: float = 0.0
     client_subjects: dict[str, list[str]] | None = None
+    result_name: str | None = None
 
 
 @dataclass
@@ -129,6 +130,11 @@ def load_config(path: str | Path) -> ExperimentConfig:
             client_num_cpus=float(federated_cfg.get("client_num_cpus", 1.0)),
             client_num_gpus=float(federated_cfg.get("client_num_gpus", 0.0)),
             client_subjects=client_subjects,
+            result_name=(
+                None
+                if federated_cfg.get("result_name") in (None, "")
+                else str(federated_cfg.get("result_name"))
+            ),
         )
 
         if federated.num_clients < 1:

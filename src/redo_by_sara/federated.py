@@ -5,7 +5,7 @@ import json
 from collections import OrderedDict
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable, Sequence
+from typing import Any, Iterable, Sequence
 
 import numpy as np
 import torch
@@ -68,6 +68,16 @@ def _score_for_task(task: str, outputs: torch.Tensor, targets: torch.Tensor) -> 
         return torch.sqrt(torch.mean((outputs - targets) ** 2)).item()
     predictions = torch.argmax(outputs, dim=1)
     return (predictions == targets).float().mean().item()
+
+
+def regression_r2_score(outputs: torch.Tensor, targets: torch.Tensor) -> float:
+    predictions = outputs.reshape(-1).float()
+    actual = targets.reshape(-1).float()
+    ss_res = torch.sum((actual - predictions) ** 2)
+    ss_tot = torch.sum((actual - torch.mean(actual)) ** 2)
+    if ss_tot.item() <= 1e-12:
+        return 0.0
+    return (1.0 - ss_res / ss_tot).item()
 
 
 def round_robin_subject_map(subject_ids: Sequence[str], num_clients: int) -> dict[str, list[str]]:
@@ -293,12 +303,22 @@ def save_partition_summary(path: Path, summary: dict[str, object]) -> None:
     path.write_text(json.dumps(summary, indent=2))
 
 
-def save_round_history(path: Path, rows: Sequence[dict[str, float]]) -> None:
+def save_round_history(path: Path, rows: Sequence[dict[str, Any]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     if not rows:
         path.write_text("")
         return
-    preferred = ["round", "train_loss", "train_score", "val_loss", "val_score"]
+    preferred = [
+        "round",
+        "client_id",
+        "num_examples",
+        "train_loss",
+        "train_score",
+        "train_r2",
+        "val_loss",
+        "val_score",
+        "val_r2",
+    ]
     discovered = {key for row in rows for key in row}
     fieldnames = [key for key in preferred if key in discovered]
     fieldnames.extend(sorted(discovered - set(fieldnames)))

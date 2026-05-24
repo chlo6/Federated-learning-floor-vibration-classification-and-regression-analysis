@@ -1,0 +1,65 @@
+{
+  "output_path": "artifacts/confusion_comparisons/classification_iid_30r_3e_test_round_30_confusion.png",
+  "checkpoint_path": "artifacts/round_checkpoints/classification_iid_30r_3e/classification_iid_30r_3e_round_030.pt",
+  "split": "test",
+  "round": 30,
+  "accuracy": 0.9261744966442953,
+  "class_names": [
+    "003",
+    "004",
+    "005",
+    "006",
+    "007",
+    "008"
+  ],
+  "confusion_matrix": [
+    [
+      29,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      27,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      22,
+      3,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      25,
+      0,
+      0
+    ],
+    [
+      0,
+      8,
+      0,
+      0,
+      17,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      18
+    ]
+  ]
+}

@@ -173,6 +173,7 @@ def main() -> None:
 
     partition_summary_path = config.output_dir / f"{config.training.task}_federated_partitions.json"
     history_path = config.output_dir / f"{config.training.task}_federated_history.csv"
+    client_history_path = config.output_dir / f"{config.training.task}_federated_client_history.csv"
     summary_path = config.output_dir / f"{config.training.task}_federated_summary.json"
     model_path = config.output_dir / f"{config.training.task}_flower_model.pt"
     save_partition_summary(partition_summary_path, partition_summary)
@@ -229,6 +230,7 @@ def main() -> None:
                 weight_decay=self.experiment.training.weight_decay,
             )
             return get_parameters(model), len(self.partition.train_indices), {
+                "client_id": self.partition.client_id,
                 "train_loss": float(train_result.loss),
                 "train_score": float(train_result.score),
             }
@@ -278,11 +280,36 @@ def main() -> None:
             super().__init__(*args, **kwargs)
             self.latest_parameters = kwargs.get("initial_parameters")
             self.fit_rows: list[dict[str, float]] = []
+            self.client_rows: list[dict[str, float | str]] = []
 
         def aggregate_fit(self, server_round: int, results: Any, failures: Any) -> tuple[Any, dict[str, float]]:
             aggregated_parameters, aggregated_metrics = super().aggregate_fit(server_round, results, failures)
             if aggregated_parameters is not None:
                 self.latest_parameters = aggregated_parameters
+
+            for _, fit_result in results:
+                metrics = getattr(fit_result, "metrics", {}) or {}
+                client_id = str(metrics.get("client_id", "unknown"))
+                client_row: dict[str, float | str] = {
+                    "round": float(server_round),
+                    "client_id": client_id,
+                    "num_examples": float(getattr(fit_result, "num_examples", 0)),
+                }
+                if "train_loss" in metrics:
+                    client_row["train_loss"] = float(metrics["train_loss"])
+                if "train_score" in metrics:
+                    client_row["train_score"] = float(metrics["train_score"])
+                self.client_rows.append(client_row)
+
+                if run is not None:
+                    wandb.log(
+                        {
+                            f"clients/{client_id}/train_loss": client_row.get("train_loss"),
+                            f"clients/{client_id}/train_score": client_row.get("train_score"),
+                            f"clients/{client_id}/num_examples": client_row["num_examples"],
+                        },
+                        step=server_round,
+                    )
 
             row = {"round": float(server_round)}
             if "train_loss" in aggregated_metrics:
@@ -374,6 +401,7 @@ def main() -> None:
 
         round_rows = _merge_round_rows(strategy.fit_rows, eval_rows)
         save_round_history(history_path, round_rows)
+        save_round_history(client_history_path, strategy.client_rows)
         model_path.parent.mkdir(parents=True, exist_ok=True)
         torch.save(final_model.state_dict(), model_path)
 
@@ -386,6 +414,7 @@ def main() -> None:
             "task": config.training.task,
             "model_path": str(model_path),
             "history_path": str(history_path),
+            "client_history_path": str(client_history_path),
             "partition_summary_path": str(partition_summary_path),
             "num_clients": config.federated.num_clients,
             "num_rounds": config.federated.num_rounds,

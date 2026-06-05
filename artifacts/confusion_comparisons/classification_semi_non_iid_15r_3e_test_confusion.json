@@ -1,0 +1,66 @@
+{
+  "output_path": "artifacts/confusion_comparisons/classification_semi_non_iid_15r_3e_test_confusion.png",
+  "model_path": "artifacts/classification_semi_non_iid_15r_3e_flower_model.pt",
+  "config_path": "configs/fl_semi_non_iid_classification_15r_3e.yaml",
+  "split": "test",
+  "accuracy": 0.6308724832214765,
+  "num_examples": 149,
+  "class_names": [
+    "003",
+    "004",
+    "005",
+    "006",
+    "007",
+    "008"
+  ],
+  "matrix": [
+    [
+      15,
+      0,
+      0,
+      0,
+      0,
+      14
+    ],
+    [
+      0,
+      15,
+      0,
+      0,
+      12,
+      0
+    ],
+    [
+      2,
+      0,
+      23,
+      0,
+      0,
+      0
+    ],
+    [
+      1,
+      0,
+      24,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      2,
+      0,
+      0,
+      23,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      18
+    ]
+  ]
+}

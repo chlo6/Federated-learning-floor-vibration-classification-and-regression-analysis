@@ -2,13 +2,13 @@
   "client_subjects": {
     "0": [
       "003",
-      "004"
+      "004",
+      "007",
+      "008"
     ],
     "1": [
       "005",
-      "006"
-    ],
-    "2": [
+      "006",
       "007",
       "008"
     ]
@@ -18,28 +18,23 @@
       "client_id": "0",
       "subjects": [
         "003",
-        "004"
+        "004",
+        "007",
+        "008"
       ],
-      "num_train_windows": 160,
-      "num_train_runs": 18
+      "num_train_windows": 302,
+      "num_train_runs": 33
     },
     {
       "client_id": "1",
       "subjects": [
         "005",
-        "006"
-      ],
-      "num_train_windows": 149,
-      "num_train_runs": 18
-    },
-    {
-      "client_id": "2",
-      "subjects": [
+        "006",
         "007",
         "008"
       ],
-      "num_train_windows": 142,
-      "num_train_runs": 15
+      "num_train_windows": 291,
+      "num_train_runs": 33
     }
   ],
   "num_global_train": 451,

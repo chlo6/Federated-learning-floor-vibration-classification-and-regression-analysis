@@ -13,6 +13,17 @@
       "008"
     ]
   },
+  "shared_subjects": {
+    "007": [
+      "0",
+      "1"
+    ],
+    "008": [
+      "0",
+      "1"
+    ]
+  },
+  "total_client_train_windows": 593,
   "clients": [
     {
       "client_id": "0",

@@ -92,6 +92,21 @@ def build_client_partitions(
     num_clients: int,
     client_subjects: dict[str, list[str]] | None = None,
 ) -> tuple[list[ClientPartition], dict[str, list[str]]]:
+    """
+    Build client partitions for federated learning, supporting both exclusive and shared subjects.
+    
+    A subject can now be assigned to multiple clients (shared subjects). When a subject is shared,
+    its training data is replicated to all owning clients. Non-shared subjects are exclusive to one client.
+    
+    Args:
+        artifact: Data artifact containing train/val/test indices and metadata
+        num_clients: Number of clients
+        client_subjects: Optional mapping of client_id -> list of subject_ids. 
+                        Subjects can appear in multiple clients (shared) or just one (exclusive).
+    
+    Returns:
+        Tuple of (client_partitions, resolved_subjects)
+    """
     global_train_indices = _as_index_list(artifact["train_indices"])
     global_val_indices = set(_as_index_list(artifact["val_indices"]))
     global_test_indices = set(_as_index_list(artifact["test_indices"]))
@@ -109,41 +124,72 @@ def build_client_partitions(
             f"Client ids must match {sorted(expected_client_ids)}, got {sorted(resolved_subjects)}."
         )
 
-    subject_owner: dict[str, str] = {}
+    # Build subject_owners: subject -> set of client IDs (supports multiple clients per subject)
+    subject_owners: dict[str, set[str]] = {}
     for client_id, subject_ids in sorted(resolved_subjects.items()):
         for subject_id in subject_ids:
-            if subject_id in subject_owner:
-                raise ValueError(f"Subject {subject_id} is assigned to multiple clients.")
-            subject_owner[subject_id] = client_id
+            if subject_id not in subject_owners:
+                subject_owners[subject_id] = set()
+            subject_owners[subject_id].add(client_id)
+    
+    # Identify shared subjects (subjects owned by multiple clients)
+    shared_subjects: set[str] = {subject_id for subject_id, owners in subject_owners.items() if len(owners) > 1}
 
-    missing_subjects = sorted(set(train_subjects) - set(subject_owner))
+    missing_subjects = sorted(set(train_subjects) - set(subject_owners))
     if missing_subjects:
         raise ValueError(
             f"Training subjects missing from client assignment: {missing_subjects}."
         )
+    unknown_subjects = sorted(set(subject_owners) - set(train_subjects))
+    if unknown_subjects:
+        raise ValueError(
+            f"Client assignment includes subjects not present in the training split: {unknown_subjects}."
+        )
 
+    # Build partitions: each client gets all indices for their exclusive subjects and all shared subjects they own
     partitions: dict[str, list[int]] = {client_id: [] for client_id in sorted(expected_client_ids)}
     for index in global_train_indices:
         subject_id = str(metadata[index]["subject_id"])
-        owner = subject_owner.get(subject_id)
-        if owner is None:
+        owners = subject_owners.get(subject_id)
+        if owners is None:
             raise ValueError(f"No client assignment found for subject {subject_id}.")
-        partitions[owner].append(index)
+        # Add this index to all clients that own the subject
+        for owner_client_id in owners:
+            partitions[owner_client_id].append(index)
 
-    seen_indices: set[int] = set()
+    # Validate partitions
+    all_seen_indices: set[int] = set()  # Track all unique indices seen (accounting for replication)
+    exclusive_subject_indices: dict[str, set[int]] = {}  # Track exclusive subject indices per client
+    
+    # First pass: identify exclusive subject indices for overlap checking
+    for client_id in sorted(partitions):
+        exclusive_subject_indices[client_id] = set()
+        for index in partitions[client_id]:
+            subject_id = str(metadata[index]["subject_id"])
+            if subject_id not in shared_subjects:
+                exclusive_subject_indices[client_id].add(index)
+        all_seen_indices.update(partitions[client_id])
+    
+    # Second pass: validate no inter-client overlap for exclusive subjects
+    for i, client_id_1 in enumerate(sorted(partitions)):
+        for client_id_2 in sorted(partitions)[i+1:]:
+            # Check overlap only for exclusive subject indices
+            overlap = exclusive_subject_indices[client_id_1] & exclusive_subject_indices[client_id_2]
+            if overlap:
+                raise ValueError(
+                    f"Exclusive subject indices overlap between client {client_id_1} and {client_id_2}: {sorted(overlap)}"
+                )
+
+    # Validate no overlap with val/test and build final client partitions
     client_partitions: list[ClientPartition] = []
     for client_id in sorted(partitions):
         indices = sorted(partitions[client_id])
         if not indices:
             raise ValueError(f"Client {client_id} has no training windows.")
-        overlap = seen_indices & set(indices)
-        if overlap:
-            raise ValueError(f"Client {client_id} overlaps another client on indices: {sorted(overlap)}")
         if set(indices) & global_val_indices:
             raise ValueError(f"Client {client_id} overlaps the global validation split.")
         if set(indices) & global_test_indices:
             raise ValueError(f"Client {client_id} overlaps the global test split.")
-        seen_indices.update(indices)
         client_partitions.append(
             ClientPartition(
                 client_id=client_id,
@@ -152,8 +198,9 @@ def build_client_partitions(
             )
         )
 
-    if seen_indices != set(global_train_indices):
-        missing_indices = sorted(set(global_train_indices) - seen_indices)
+    # Validate that all global training indices are covered (accounting for shared subject replication)
+    if all_seen_indices != set(global_train_indices):
+        missing_indices = sorted(set(global_train_indices) - all_seen_indices)
         raise ValueError(f"Client partitions do not cover the full global train split: {missing_indices}")
 
     return client_partitions, resolved_subjects
@@ -274,6 +321,16 @@ def create_partition_summary(
 ) -> dict[str, object]:
     metadata = artifact["metadata"]
     client_rows = []
+    subject_clients: dict[str, list[str]] = {}
+    for client_id, subject_ids in client_subjects.items():
+        for subject_id in subject_ids:
+            subject_clients.setdefault(str(subject_id), []).append(str(client_id))
+    shared_subjects = {
+        subject_id: sorted(client_ids)
+        for subject_id, client_ids in subject_clients.items()
+        if len(client_ids) > 1
+    }
+
     for partition in client_partitions:
         run_groups = {
             (str(metadata[index]["subject_id"]), int(metadata[index]["run_index"]))
@@ -290,6 +347,8 @@ def create_partition_summary(
 
     return {
         "client_subjects": client_subjects,
+        "shared_subjects": shared_subjects,
+        "total_client_train_windows": sum(row["num_train_windows"] for row in client_rows),
         "clients": client_rows,
         "num_global_train": len(_as_index_list(artifact["train_indices"])),
         "num_global_val": len(_as_index_list(artifact["val_indices"])),

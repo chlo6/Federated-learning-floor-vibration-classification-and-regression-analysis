@@ -138,6 +138,14 @@ def _coerce_ndarrays(parameters: Any, parameters_to_ndarrays: Any) -> list[Any]:
     return parameters_to_ndarrays(parameters)
 
 
+def _result_stem(config: ExperimentConfig) -> str:
+    federated = config.federated
+    if federated is None:
+        raise ValueError("Missing federated config.")
+    suffix = f"_{federated.result_name}" if federated.result_name else ""
+    return f"{config.training.task}{suffix}"
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run a Flower federated-learning sandbox.")
     parser.add_argument("--config", required=True, help="Path to YAML config file.")
@@ -171,11 +179,12 @@ def main() -> None:
         client_subjects=client_subjects,
     )
 
-    partition_summary_path = config.output_dir / f"{config.training.task}_federated_partitions.json"
-    history_path = config.output_dir / f"{config.training.task}_federated_history.csv"
-    client_history_path = config.output_dir / f"{config.training.task}_federated_client_history.csv"
-    summary_path = config.output_dir / f"{config.training.task}_federated_summary.json"
-    model_path = config.output_dir / f"{config.training.task}_flower_model.pt"
+    result_stem = _result_stem(config)
+    partition_summary_path = config.output_dir / f"{result_stem}_federated_partitions.json"
+    history_path = config.output_dir / f"{result_stem}_federated_history.csv"
+    client_history_path = config.output_dir / f"{result_stem}_federated_client_history.csv"
+    summary_path = config.output_dir / f"{result_stem}_federated_summary.json"
+    model_path = config.output_dir / f"{result_stem}_flower_model.pt"
     save_partition_summary(partition_summary_path, partition_summary)
 
     run = _init_wandb(config, artifact, client_subjects)
@@ -412,6 +421,8 @@ def main() -> None:
         )
         summary = {
             "task": config.training.task,
+            "partition_mode": "subject_owned_with_optional_shared_subjects",
+            "result_name": config.federated.result_name,
             "model_path": str(model_path),
             "history_path": str(history_path),
             "client_history_path": str(client_history_path),

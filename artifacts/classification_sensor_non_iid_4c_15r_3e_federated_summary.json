@@ -1,0 +1,79 @@
+{
+  "task": "classification",
+  "partition_mode": "sensor_owned_feature_non_iid",
+  "result_name": "4c_15r_3e",
+  "model_path": "/home/coder/workspace/Federated-learning-floor-vibration-classification-and-regression-analysis/artifacts/classification_sensor_non_iid_4c_15r_3e_flower_model.pt",
+  "history_path": "/home/coder/workspace/Federated-learning-floor-vibration-classification-and-regression-analysis/artifacts/classification_sensor_non_iid_4c_15r_3e_federated_history.csv",
+  "client_history_path": "/home/coder/workspace/Federated-learning-floor-vibration-classification-and-regression-analysis/artifacts/classification_sensor_non_iid_4c_15r_3e_federated_client_history.csv",
+  "partition_summary_path": "/home/coder/workspace/Federated-learning-floor-vibration-classification-and-regression-analysis/artifacts/classification_sensor_non_iid_4c_15r_3e_federated_partitions.json",
+  "num_clients": 4,
+  "num_rounds": 15,
+  "local_epochs": 3,
+  "test_model": "final_round",
+  "test_evaluation": "full_server_sensor_set_after_training",
+  "test_loss": 1.177335915144752,
+  "test_score": 0.4941176474094391,
+  "test_r2": null,
+  "masked_client_test_metrics": [
+    {
+      "loss": 1.1706531713990604,
+      "score": 0.47058823704719543,
+      "r2": null,
+      "client_id": "0",
+      "sensors": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5"
+      ]
+    },
+    {
+      "loss": 1.7245012423571418,
+      "score": 0.20000000298023224,
+      "r2": null,
+      "client_id": "1",
+      "sensors": [
+        "6",
+        "7",
+        "8x",
+        "8y",
+        "8z"
+      ]
+    },
+    {
+      "loss": 1.8691919382880715,
+      "score": 0.1882352977991104,
+      "r2": null,
+      "client_id": "2",
+      "sensors": [
+        "9x",
+        "9y",
+        "9z",
+        "10",
+        "11"
+      ]
+    },
+    {
+      "loss": 1.828101769615622,
+      "score": 0.1882352977991104,
+      "r2": null,
+      "client_id": "3",
+      "sensors": [
+        "12",
+        "13",
+        "14",
+        "15",
+        "16"
+      ]
+    }
+  ],
+  "confusion_matrix_path": "/home/coder/workspace/Federated-learning-floor-vibration-classification-and-regression-analysis/artifacts/confusion_comparisons/classification_sensor_non_iid_4c_15r_3e_test_confusion.png",
+  "confusion_matrix_json_path": "/home/coder/workspace/Federated-learning-floor-vibration-classification-and-regression-analysis/artifacts/confusion_comparisons/classification_sensor_non_iid_4c_15r_3e_test_confusion.json",
+  "split_overlap": {
+    "train_val": 0,
+    "train_test": 0,
+    "val_test": 0,
+    "overlapping_train_test_windows": 0
+  }
+}

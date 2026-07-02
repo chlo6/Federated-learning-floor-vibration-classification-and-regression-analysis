@@ -148,7 +148,12 @@ def _plot_server_metric(
 
 
 def _default_paths(task: str, mode: str, result_name: str | None) -> tuple[Path, Path, Path]:
-    infix = "_iid" if mode == "iid" else ""
+    if mode == "iid":
+        infix = "_iid"
+    elif mode == "sensor":
+        infix = "_sensor_non_iid"
+    else:
+        infix = ""
     suffix = f"_{result_name}" if result_name else ""
     return (
         Path(f"artifacts/{task}{infix}{suffix}_federated_history.csv"),
@@ -160,7 +165,7 @@ def _default_paths(task: str, mode: str, result_name: str | None) -> tuple[Path,
 def main() -> None:
     parser = argparse.ArgumentParser(description="Plot client and global Flower metrics separately.")
     parser.add_argument("--task", choices=["classification", "regression"], required=True)
-    parser.add_argument("--mode", choices=["iid", "subject"], default="iid")
+    parser.add_argument("--mode", choices=["iid", "subject", "sensor"], default="iid")
     parser.add_argument("--result-name", default=None)
     parser.add_argument("--history", type=Path, default=None)
     parser.add_argument("--client-history", type=Path, default=None)
@@ -177,7 +182,12 @@ def main() -> None:
     client_rows = _read_history(client_history_path)
     summary = _read_summary(summary_path)
 
-    mode_label = "iid" if args.mode == "iid" else "subject_owned"
+    if args.mode == "iid":
+        mode_label = "iid"
+    elif args.mode == "sensor":
+        mode_label = "sensor_non_iid"
+    else:
+        mode_label = "subject_owned"
     suffix = f"_{args.result_name}" if args.result_name else ""
     prefix = f"{args.task}_{mode_label}{suffix}"
     outputs = {

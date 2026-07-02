@@ -1,0 +1,71 @@
+{
+  "task": "regression",
+  "partition_mode": "sensor_owned_feature_non_iid",
+  "result_name": "4c_3ch_no006_15r_3e",
+  "model_path": "/home/coder/workspace/Federated-learning-floor-vibration-classification-and-regression-analysis/artifacts/regression_sensor_non_iid_4c_3ch_no006_15r_3e_flower_model.pt",
+  "history_path": "/home/coder/workspace/Federated-learning-floor-vibration-classification-and-regression-analysis/artifacts/regression_sensor_non_iid_4c_3ch_no006_15r_3e_federated_history.csv",
+  "client_history_path": "/home/coder/workspace/Federated-learning-floor-vibration-classification-and-regression-analysis/artifacts/regression_sensor_non_iid_4c_3ch_no006_15r_3e_federated_client_history.csv",
+  "partition_summary_path": "/home/coder/workspace/Federated-learning-floor-vibration-classification-and-regression-analysis/artifacts/regression_sensor_non_iid_4c_3ch_no006_15r_3e_federated_partitions.json",
+  "num_clients": 4,
+  "num_rounds": 15,
+  "local_epochs": 3,
+  "test_model": "final_round",
+  "test_evaluation": "full_server_sensor_set_after_training",
+  "test_loss": 0.008165399963692041,
+  "test_score": 0.09036260843276978,
+  "test_r2": 0.38186919689178467,
+  "masked_client_test_metrics": [
+    {
+      "loss": 0.013569671345848433,
+      "score": 0.11648894101381302,
+      "r2": -0.027240753173828125,
+      "client_id": "0",
+      "sensors": [
+        "1",
+        "2",
+        "4"
+      ]
+    },
+    {
+      "loss": 0.014503791561009179,
+      "score": 0.12043168395757675,
+      "r2": -0.09795475006103516,
+      "client_id": "1",
+      "sensors": [
+        "12",
+        "13",
+        "3"
+      ]
+    },
+    {
+      "loss": 0.007594438145120798,
+      "score": 0.0871460810303688,
+      "r2": 0.4250916838645935,
+      "client_id": "2",
+      "sensors": [
+        "5",
+        "6",
+        "14"
+      ]
+    },
+    {
+      "loss": 0.01572645780905871,
+      "score": 0.1254051774740219,
+      "r2": -0.19051218032836914,
+      "client_id": "3",
+      "sensors": [
+        "7",
+        "8z",
+        "15"
+      ]
+    }
+  ],
+  "confusion_matrix_path": null,
+  "confusion_matrix_json_path": null,
+  "split_overlap": {
+    "train_val": 0,
+    "train_test": 0,
+    "val_test": 0,
+    "overlapping_train_test_windows": 0
+  }
+}

@@ -1,0 +1,69 @@
+seed: 4601
+output_dir: artifacts
+artifact_name: raw_windows_sensor_non_iid_4c.pt
+
+data:
+  dataset_root: TestData/20251124_Testing
+  sensor_channel_map:
+    "1": [1]
+    "2": [2]
+    "3": [3]
+    "4": [4]
+    "5": [5]
+    "6": [6]
+    "7": [7]
+    "8x": [8]
+    "8y": [9]
+    "8z": [10]
+    "9x": [11]
+    "9y": [12]
+    "9z": [13]
+    "10": [14]
+    "11": [15]
+    "12": [16]
+    "13": [17]
+    "14": [18]
+    "15": [19]
+    "16": [20]
+  selected_sensors: ["1", "2", "3", "4", "5", "6", "7", "8x", "8y", "8z", "9x", "9y", "9z", "10", "11", "12", "13", "14", "15", "16"]
+  target_sample_rate: 400.0
+  window_seconds: 5.0
+  step_seconds: 1.0
+  train_ratio: 0.8
+  val_ratio: 0.0
+  test_ratio: 0.2
+  subject_limit: null
+
+sensor_non_iid:
+  sensors_per_client: 5
+  purge_gap_seconds: 0.0
+  client_sensors:
+    "0": ["1", "2", "3", "4", "5"]
+    "1": ["6", "7", "8x", "8y", "8z"]
+    "2": ["9x", "9y", "9z", "10", "11"]
+    "3": ["12", "13", "14", "15", "16"]
+
+training:
+  task: classification
+  batch_size: 32
+  epochs: 15
+  learning_rate: 0.001
+  weight_decay: 0.0001
+  num_workers: 0
+
+federated:
+  result_name: 4c_15r_3e
+  num_clients: 4
+  num_rounds: 15
+  local_epochs: 3
+  fraction_fit: 1.0
+  fraction_evaluate: 0.0
+  client_num_cpus: 1.0
+  client_num_gpus: 0.0
+
+wandb:
+  enabled: false
+  project: ENGR859-final-project
+  entity: null
+  tags: ["flower", "sensor-non-iid", "classification", "4-clients", "15-rounds", "3-local-epochs", "raw-vibration"]
+  watch: false

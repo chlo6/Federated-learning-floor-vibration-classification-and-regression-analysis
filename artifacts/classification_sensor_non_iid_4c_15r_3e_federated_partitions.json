@@ -1,0 +1,90 @@
+{
+  "partition_mode": "sensor_owned_feature_non_iid",
+  "clients": [
+    {
+      "client_id": "0",
+      "sensors": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5"
+      ],
+      "channel_indices": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "num_train_windows": 240
+    },
+    {
+      "client_id": "1",
+      "sensors": [
+        "6",
+        "7",
+        "8x",
+        "8y",
+        "8z"
+      ],
+      "channel_indices": [
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "num_train_windows": 240
+    },
+    {
+      "client_id": "2",
+      "sensors": [
+        "9x",
+        "9y",
+        "9z",
+        "10",
+        "11"
+      ],
+      "channel_indices": [
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "num_train_windows": 240
+    },
+    {
+      "client_id": "3",
+      "sensors": [
+        "12",
+        "13",
+        "14",
+        "15",
+        "16"
+      ],
+      "channel_indices": [
+        15,
+        16,
+        17,
+        18,
+        19
+      ],
+      "num_train_windows": 240
+    }
+  ],
+  "num_global_train": 240,
+  "num_global_val": 0,
+  "num_global_test": 85,
+  "total_client_train_window_views": 960,
+  "client_training_window_indices_are_shared": true,
+  "client_sensor_channels_are_disjoint": true,
+  "split_overlap": {
+    "train_val": 0,
+    "train_test": 0,
+    "val_test": 0,
+    "overlapping_train_test_windows": 0
+  },
+  "split_rule": "All clients share the same global training window ids, but each client loader receives only its owned sensor channels; all other channels are zeroed after normalization. The held-out server test windows come from raw time intervals that were split before resampling/windowing."
+}

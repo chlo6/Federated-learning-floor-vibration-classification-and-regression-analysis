@@ -1,0 +1,6 @@
+{
+  "plot_path": "artifacts/wandb_fl_comparison/classification_iid_vs_non_iid_test_accuracy.png",
+  "split": "test",
+  "num_points": 47,
+  "used_validation_fallback": true
+}

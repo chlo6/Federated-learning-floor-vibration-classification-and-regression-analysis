@@ -3,7 +3,7 @@ output_dir: artifacts
 artifact_name: raw_windows.pt
 
 data:
-  dataset_root: TestData/20251124_Testing
+  dataset_root: /content/TestData/20251124_Testing
   additional_dataset_roots:
     - /content/TestData/Test_2
   excluded_subjects_by_dataset:

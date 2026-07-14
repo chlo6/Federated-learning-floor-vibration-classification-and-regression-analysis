@@ -7,7 +7,7 @@ data:
   additional_dataset_roots:
     - /content/TestData/Test_2
   excluded_subjects_by_dataset:
-    Test_2: ["006"]
+    20251124_Testing: ["006"]
   sensor_channel_map:
     "1": [1]
     "2": [2]

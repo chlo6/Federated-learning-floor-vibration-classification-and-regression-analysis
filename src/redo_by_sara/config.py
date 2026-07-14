@@ -10,6 +10,8 @@ import yaml
 @dataclass
 class DataConfig:
     dataset_root: Path
+    additional_dataset_roots: list[Path]
+    excluded_subjects_by_dataset: dict[str, list[str]]
     sensor_channel_map: dict[str, list[int]]
     selected_sensors: list[str]
     target_sample_rate: float
@@ -143,6 +145,18 @@ def load_config(path: str | Path) -> ExperimentConfig:
             raise ValueError("federated.num_rounds must be at least 1.")
         if federated.local_epochs < 1:
             raise ValueError("federated.local_epochs must be at least 1.")
+    
+    additional_dataset_roots = [
+        _resolve_path(project_root, raw_path)
+        for raw_path in data_cfg.get("additional_dataset_roots", [])
+    ]
+    
+    excluded_subjects_by_dataset = {
+        str(dataset_name): [str(subject_id).zfill(3) for subject_id in subject_ids]
+        for dataset_name, subject_ids in data_cfg.get(
+            "excluded_subjects_by_dataset", {}
+        ).items()
+    }
 
     return ExperimentConfig(
         seed=int(payload["seed"]),
@@ -150,6 +164,8 @@ def load_config(path: str | Path) -> ExperimentConfig:
         artifact_name=str(payload.get("artifact_name", "raw_windows.pt")),
         data=DataConfig(
             dataset_root=dataset_root,
+            additional_dataset_roots=additional_dataset_roots,
+            excluded_subjects_by_dataset=excluded_subjects_by_dataset,
             sensor_channel_map=sensor_channel_map,
             selected_sensors=selected_sensors,
             target_sample_rate=float(data_cfg["target_sample_rate"]),

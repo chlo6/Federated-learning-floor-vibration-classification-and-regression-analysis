@@ -41,8 +41,17 @@ def _subject_id_from_path(path: Path) -> str:
 
 
 def _find_apdm_csv(dataset_root: Path, subject_id: str) -> Path | None:
-    matches = sorted(dataset_root.glob(f"APDM_Data/*_{subject_id}_*/*.csv"))
-    return matches[0] if matches else None
+    patterns = [
+        f"APDM_Data/*_{subject_id}_*/*.csv",
+        f"APDM_data_fixed_step/sub_{subject_id}_data/*.csv",
+    ]
+
+    for pattern in patterns:
+        matches = sorted(dataset_root.glob(pattern))
+        if matches:
+            return matches[0]
+
+    return None
 
 
 def _parse_speed_labels(csv_path: Path) -> list[float]:
@@ -254,7 +263,18 @@ def build_artifact(config: ExperimentConfig) -> dict[str, object]:
     
     for dataset_root in dataset_roots:
         run_segments = _load_run_segments(dataset_root / "runPeramiters.csv")
-        hdf5_files = sorted((dataset_root / "vib" / "Data").glob("*.hdf5"))
+        
+        possible_data_dirs = [
+            dataset_root / "vib" / "Data",
+            dataset_root / "data",
+        ]
+        
+        hdf5_files = []
+        
+        for data_dir in possible_data_dirs:
+            hdf5_files.extend(data_dir.glob("*.hdf5"))
+        
+        hdf5_files = sorted(set(hdf5_files))
     
         if config.data.subject_limit is not None:
             hdf5_files = hdf5_files[: config.data.subject_limit]

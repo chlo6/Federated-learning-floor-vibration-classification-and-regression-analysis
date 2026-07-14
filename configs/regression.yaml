@@ -4,6 +4,10 @@ artifact_name: raw_windows.pt
 
 data:
   dataset_root: TestData/20251124_Testing
+  additional_dataset_roots:
+    - /content/TestData/Test_2
+  excluded_subjects_by_dataset:
+    Test_2: ["006"]
   sensor_channel_map:
     "1": [1]
     "2": [2]

@@ -238,13 +238,11 @@ def _assign_subject_run_splits(
 
 
 def build_artifact(config: ExperimentConfig) -> dict[str, object]:
-    dataset_root = config.data.dataset_root
-    run_segments = _load_run_segments(dataset_root / "runPeramiters.csv")
-    hdf5_files = sorted((dataset_root / "vib" / "Data").glob("*.hdf5"))
-
-    if config.data.subject_limit is not None:
-        hdf5_files = hdf5_files[: config.data.subject_limit]
-
+    dataset_roots = [
+        config.data.dataset_root,
+        *config.data.additional_dataset_roots,
+    ]
+    
     selected_channels, channel_labels = _resolve_channel_selection(config)
     zero_based_channels = [channel - 1 for channel in selected_channels]
     sorted_positions = sorted(range(len(zero_based_channels)), key=lambda idx: zero_based_channels[idx])
@@ -253,48 +251,62 @@ def build_artifact(config: ExperimentConfig) -> dict[str, object]:
 
     examples: list[Example] = []
     skipped_subjects: list[str] = []
+    
+    for dataset_root in dataset_roots:
+        run_segments = _load_run_segments(dataset_root / "runPeramiters.csv")
+        hdf5_files = sorted((dataset_root / "vib" / "Data").glob("*.hdf5"))
+    
+        if config.data.subject_limit is not None:
+            hdf5_files = hdf5_files[: config.data.subject_limit]
 
-    for hdf5_path in hdf5_files:
-        subject_id = _subject_id_from_path(hdf5_path)
-        apdm_csv = _find_apdm_csv(dataset_root, subject_id)
-        if apdm_csv is None:
-            skipped_subjects.append(subject_id)
-            continue
+        excluded_subjects = set(config.data.excluded_subjects_by_dataset.get(dataset_root.name, []))
+        
+        for hdf5_path in hdf5_files:
+            subject_id = _subject_id_from_path(hdf5_path)
 
-        speeds = _parse_speed_labels(apdm_csv)
-        with h5py.File(hdf5_path, "r") as handle:
-            data = handle["experiment/data"][:, sorted_channels, :]
-            data = data[:, restore_order, :]
-            general_parameters = handle["experiment/general_parameters"][:]
-            original_rate = _get_general_parameter(general_parameters, "fs")
-            if original_rate is None:
-                raise ValueError(f"Missing sample rate in {hdf5_path}")
-
-        data = _resample_trials(data, original_rate, config.data.target_sample_rate)
-        run_count = min(len(data), len(speeds))
-
-        for run_index in range(run_count):
-            segment = run_segments.get((subject_id, run_index))
-            if segment is None or int(segment["skip_run"]) == 1:
+            if subject_id in excluded_subjects:
+                print(f"Skipping subject {subject_id}")
                 continue
-
-            end_sec = float(segment["data_end"])
-            if end_sec <= 0:
-                end_sec = data.shape[-1] / config.data.target_sample_rate
-
-            examples.extend(
-                _window_run(
-                    trial=data[run_index],
-                    speed=speeds[run_index],
-                    subject_id=subject_id,
-                    run_index=run_index,
-                    start_sec=float(segment["data_start"]),
-                    end_sec=end_sec,
-                    sample_rate=config.data.target_sample_rate,
-                    window_seconds=config.data.window_seconds,
-                    step_seconds=config.data.step_seconds,
+            
+            apdm_csv = _find_apdm_csv(dataset_root, subject_id)
+            if apdm_csv is None:
+                skipped_subjects.append(subject_id)
+                continue
+    
+            speeds = _parse_speed_labels(apdm_csv)
+            with h5py.File(hdf5_path, "r") as handle:
+                data = handle["experiment/data"][:, sorted_channels, :]
+                data = data[:, restore_order, :]
+                general_parameters = handle["experiment/general_parameters"][:]
+                original_rate = _get_general_parameter(general_parameters, "fs")
+                if original_rate is None:
+                    raise ValueError(f"Missing sample rate in {hdf5_path}")
+    
+            data = _resample_trials(data, original_rate, config.data.target_sample_rate)
+            run_count = min(len(data), len(speeds))
+    
+            for run_index in range(run_count):
+                segment = run_segments.get((subject_id, run_index))
+                if segment is None or int(segment["skip_run"]) == 1:
+                    continue
+    
+                end_sec = float(segment["data_end"])
+                if end_sec <= 0:
+                    end_sec = data.shape[-1] / config.data.target_sample_rate
+    
+                examples.extend(
+                    _window_run(
+                        trial=data[run_index],
+                        speed=speeds[run_index],
+                        subject_id=subject_id,
+                        run_index=run_index,
+                        start_sec=float(segment["data_start"]),
+                        end_sec=end_sec,
+                        sample_rate=config.data.target_sample_rate,
+                        window_seconds=config.data.window_seconds,
+                        step_seconds=config.data.step_seconds,
+                    )
                 )
-            )
 
     if not examples:
         raise RuntimeError("No examples were created. Check paths and label parsing.")

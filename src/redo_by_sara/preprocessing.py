@@ -286,6 +286,12 @@ def build_artifact(config: ExperimentConfig) -> dict[str, object]:
 
             if subject_id in excluded_subjects:
                 print(f"Skipping subject {subject_id}")
+
+                print(
+                    "DATASET:", dataset_root.name,
+                    "SUBJECT:", subject_id,
+                    "EXCLUDED:", sorted(excluded_subjects),
+                )
                 continue
             
             apdm_csv = _find_apdm_csv(dataset_root, subject_id)

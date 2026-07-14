@@ -1,4 +1,5 @@
-seed: 4601
+# seed: 4601
+seed: 1234
 output_dir: artifacts
 artifact_name: raw_windows.pt
 

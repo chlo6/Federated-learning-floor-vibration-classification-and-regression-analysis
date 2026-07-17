@@ -24,10 +24,12 @@ from redo_by_sara.federated import (
     create_federated_model,
     create_partition_summary,
     evaluate_model,
-    get_parameters,
+    get_base_parameters,
+    get_head_state,
     save_partition_summary,
     save_round_history,
-    set_parameters,
+    set_base_parameters,
+    set_head_state,
     train_local_model,
 )
 
@@ -55,6 +57,9 @@ def _build_wandb_config(
         "num_rounds": federated.num_rounds,
         "local_epochs": federated.local_epochs,
         "client_subjects": client_subjects,
+        "algorithm": "fedper",
+        "shared_layers": "features",
+        "personal_layers": "head",
     }
 
 
@@ -185,6 +190,8 @@ def main() -> None:
     client_history_path = config.output_dir / f"{result_stem}_federated_client_history.csv"
     summary_path = config.output_dir / f"{result_stem}_federated_summary.json"
     model_path = config.output_dir / f"{result_stem}_flower_model.pt"
+    client_head_dir = config.output_dir / "fedper_heads" / result_stem
+    client_head_dir.mkdir(parents=True, exist_ok=True)
     save_partition_summary(partition_summary_path, partition_summary)
 
     run = _init_wandb(config, artifact, client_subjects)
@@ -208,6 +215,7 @@ def main() -> None:
                 else "cpu"
             )
             self.artifact = torch.load(artifact_path, map_location="cpu", weights_only=False)
+            self.head_path = client_head_dir / f"client_{partition.client_id}_head.pt"
             self.train_loader = build_loader(
                 artifact=self.artifact,
                 indices=self.partition.train_indices,
@@ -220,7 +228,7 @@ def main() -> None:
 
         def get_parameters(self, config: dict[str, Any]) -> list[Any]:
             model = create_federated_model(self.artifact, self.task)
-            return get_parameters(model)
+            return get_base_parameters(model)
 
         def fit(
             self,
@@ -228,7 +236,12 @@ def main() -> None:
             config: dict[str, Any],
         ) -> tuple[list[Any], int, dict[str, float]]:
             model = create_federated_model(self.artifact, self.task).to(self.device)
-            set_parameters(model, parameters)
+            if self.head_path.exists():
+                head_state = torch.load(
+                    self.head_path, map_location=self.device, weights_only=True
+                )
+                set_head_state(model, head_state)
+            set_base_parameters(model, parameters)
             train_result = train_local_model(
                 model=model,
                 loader=self.train_loader,
@@ -238,7 +251,10 @@ def main() -> None:
                 learning_rate=self.experiment.training.learning_rate,
                 weight_decay=self.experiment.training.weight_decay,
             )
-            return get_parameters(model), len(self.partition.train_indices), {
+            # Flower may recreate client objects between rounds, so persist the
+            # personal head explicitly. Only the base is returned to the server.
+            torch.save(get_head_state(model), self.head_path)
+            return get_base_parameters(model), len(self.partition.train_indices), {
                 "client_id": self.partition.client_id,
                 "train_loss": float(train_result.loss),
                 "train_score": float(train_result.score),
@@ -262,11 +278,24 @@ def main() -> None:
         seed=config.seed,
     )
     server_device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # This fixed head makes centralized validation a representation-learning
+    # proxy only. FedPer's real deployable models are global base + client head.
+    torch.manual_seed(config.seed)
+    server_proxy_model = create_federated_model(
+        artifact, config.training.task
+    ).to(server_device)
 
     def evaluate_fn(server_round: int, parameters: Any, _: dict[str, Any]) -> tuple[float, dict[str, float]]:
-        model = create_federated_model(artifact, config.training.task).to(server_device)
-        set_parameters(model, _coerce_ndarrays(parameters, parameters_to_ndarrays))
-        result = evaluate_model(model=model, loader=val_loader, task=config.training.task, device=server_device)
+        set_base_parameters(
+            server_proxy_model,
+            _coerce_ndarrays(parameters, parameters_to_ndarrays),
+        )
+        result = evaluate_model(
+            model=server_proxy_model,
+            loader=val_loader,
+            task=config.training.task,
+            device=server_device,
+        )
         row = {
             "round": float(server_round),
             "val_loss": float(result.loss),
@@ -337,8 +366,9 @@ def main() -> None:
                 )
             return aggregated_parameters, aggregated_metrics
 
+    torch.manual_seed(config.seed)
     initial_model = create_federated_model(artifact, config.training.task)
-    initial_parameters = ndarrays_to_parameters(get_parameters(initial_model))
+    initial_parameters = ndarrays_to_parameters(get_base_parameters(initial_model))
     strategy = TrackingFedAvg(
         fraction_fit=config.federated.fraction_fit,
         fraction_evaluate=config.federated.fraction_evaluate,
@@ -391,28 +421,79 @@ def main() -> None:
 
         final_parameters = parameters_to_ndarrays(strategy.latest_parameters)
         final_model = create_federated_model(artifact, config.training.task).to(server_device)
-        set_parameters(final_model, final_parameters)
-        test_loader = build_loader(
-            artifact=artifact,
-            indices=artifact["test_indices"],
-            task=config.training.task,
-            batch_size=config.training.batch_size,
-            num_workers=config.training.num_workers,
-            shuffle=False,
-            seed=config.seed,
-        )
-        test_result = evaluate_model(
-            model=final_model,
-            loader=test_loader,
-            task=config.training.task,
-            device=server_device,
-        )
+        set_base_parameters(final_model, final_parameters)
+        metadata = artifact["metadata"]
+        test_indices = [int(index) for index in artifact["test_indices"]]
+        personalized_test_rows: list[dict[str, float | str]] = []
+        total_test_examples = 0
+        weighted_test_loss = 0.0
+        weighted_test_score = 0.0
+        for partition in client_partitions:
+            head_path = client_head_dir / f"client_{partition.client_id}_head.pt"
+            if not head_path.exists():
+                continue
+            subject_ids = set(partition.subject_ids)
+            client_test_indices = [
+                index
+                for index in test_indices
+                if str(metadata[index]["subject_id"]) in subject_ids
+            ]
+            if not client_test_indices:
+                continue
+            client_model = create_federated_model(
+                artifact, config.training.task
+            ).to(server_device)
+            set_base_parameters(client_model, final_parameters)
+            set_head_state(
+                client_model,
+                torch.load(
+                    head_path, map_location=server_device, weights_only=True
+                ),
+            )
+            client_test_loader = build_loader(
+                artifact=artifact,
+                indices=client_test_indices,
+                task=config.training.task,
+                batch_size=config.training.batch_size,
+                num_workers=config.training.num_workers,
+                shuffle=False,
+                seed=config.seed + int(partition.client_id),
+            )
+            client_result = evaluate_model(
+                model=client_model,
+                loader=client_test_loader,
+                task=config.training.task,
+                device=server_device,
+            )
+            num_examples = len(client_test_indices)
+            total_test_examples += num_examples
+            weighted_test_loss += client_result.loss * num_examples
+            weighted_test_score += client_result.score * num_examples
+            personalized_test_rows.append(
+                {
+                    "client_id": partition.client_id,
+                    "num_examples": float(num_examples),
+                    "test_loss": float(client_result.loss),
+                    "test_score": float(client_result.score),
+                }
+            )
+        if total_test_examples == 0:
+            raise RuntimeError("No personalized FedPer client test examples were found.")
+        personalized_test_loss = weighted_test_loss / total_test_examples
+        personalized_test_score = weighted_test_score / total_test_examples
 
         round_rows = _merge_round_rows(strategy.fit_rows, eval_rows)
         save_round_history(history_path, round_rows)
         save_round_history(client_history_path, strategy.client_rows)
         model_path.parent.mkdir(parents=True, exist_ok=True)
-        torch.save(final_model.state_dict(), model_path)
+        torch.save(
+            {
+                "algorithm": "fedper",
+                "base_state_dict": final_model.features.state_dict(),
+                "client_head_dir": str(client_head_dir),
+            },
+            model_path,
+        )
 
         best_val_row = (
             min(eval_rows, key=lambda row: row["val_score"])
@@ -421,9 +502,16 @@ def main() -> None:
         )
         summary = {
             "task": config.training.task,
+            "algorithm": "fedper",
             "partition_mode": "subject_owned_with_optional_shared_subjects",
             "result_name": config.federated.result_name,
             "model_path": str(model_path),
+            "client_head_dir": str(client_head_dir),
+            "server_validation_note": (
+                "Uses a fixed reference head; deploy/evaluate FedPer with each "
+                "client's saved personal head."
+            ),
+            "personalized_test_clients": personalized_test_rows,
             "history_path": str(history_path),
             "client_history_path": str(client_history_path),
             "partition_summary_path": str(partition_summary_path),
@@ -433,8 +521,8 @@ def main() -> None:
             "best_val_round": int(best_val_row["round"]),
             "best_val_loss": float(best_val_row["val_loss"]),
             "best_val_score": float(best_val_row["val_score"]),
-            "test_loss": float(test_result.loss),
-            "test_score": float(test_result.score),
+            "test_loss": float(personalized_test_loss),
+            "test_score": float(personalized_test_score),
         }
         summary_path.write_text(json.dumps(summary, indent=2))
 

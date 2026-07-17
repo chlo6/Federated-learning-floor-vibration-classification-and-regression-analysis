@@ -556,10 +556,10 @@ def main() -> None:
                 personalized_metrics[
                     f"personalized/client_{client_id}/num_examples"
                 ] = client_row["num_examples"]
-
+        
             wandb.log(
                 {
-                    personalized_metrics,
+                    **personalized_metrics,
                     "test_loss": summary["test_loss"],
                     "test_score": summary["test_score"],
                     "best_val_round": summary["best_val_round"],
@@ -568,6 +568,7 @@ def main() -> None:
                 },
                 step=config.federated.num_rounds,
             )
+        
             run.summary.update(summary)
             run.summary.update(personalized_metrics)
 

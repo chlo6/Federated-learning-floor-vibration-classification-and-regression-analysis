@@ -314,6 +314,50 @@ def set_parameters(model: nn.Module, parameters: Iterable[np.ndarray]) -> None:
     model.load_state_dict(new_state, strict=True)
 
 
+def get_base_parameters(model: nn.Module) -> list[np.ndarray]:
+    """Return only the shared FedPer feature extractor parameters."""
+    if not hasattr(model, "features"):
+        raise ValueError("FedPer models must expose their shared base as `model.features`.")
+    return [
+        value.detach().cpu().numpy()
+        for value in model.features.state_dict().values()
+    ]
+
+
+def set_base_parameters(model: nn.Module, parameters: Iterable[np.ndarray]) -> None:
+    """Replace the shared base without touching the client's personal head."""
+    if not hasattr(model, "features"):
+        raise ValueError("FedPer models must expose their shared base as `model.features`.")
+    current_state = model.features.state_dict()
+    new_state = OrderedDict()
+    for (key, current_value), new_value in zip(
+        current_state.items(), parameters, strict=True
+    ):
+        new_state[key] = torch.from_numpy(np.asarray(new_value)).to(
+            dtype=current_value.dtype
+        )
+    model.features.load_state_dict(new_state, strict=True)
+
+
+def get_head_state(model: nn.Module) -> OrderedDict[str, torch.Tensor]:
+    """Return a CPU copy of the local FedPer head for durable client storage."""
+    if not hasattr(model, "head"):
+        raise ValueError("FedPer models must expose their personal layers as `model.head`.")
+    return OrderedDict(
+        (key, value.detach().cpu().clone())
+        for key, value in model.head.state_dict().items()
+    )
+
+
+def set_head_state(
+    model: nn.Module, state: dict[str, torch.Tensor]
+) -> None:
+    """Restore a client's personal head without changing the shared base."""
+    if not hasattr(model, "head"):
+        raise ValueError("FedPer models must expose their personal layers as `model.head`.")
+    model.head.load_state_dict(state, strict=True)
+
+
 def create_partition_summary(
     artifact: dict[str, object],
     client_partitions: Sequence[ClientPartition],

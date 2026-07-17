@@ -44,9 +44,9 @@ training:
 
 federated:
   result_name: semi_non_iid_fedper
-  num_clients: 2
-  num_rounds: 5
-  local_epochs: 1
+  num_clients: 3
+  num_rounds: 30
+  local_epochs: 3
   fraction_fit: 1.0
   fraction_evaluate: 0.0
   client_num_cpus: 1.0

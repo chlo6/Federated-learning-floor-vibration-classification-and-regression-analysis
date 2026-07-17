@@ -527,8 +527,29 @@ def main() -> None:
         summary_path.write_text(json.dumps(summary, indent=2))
 
         if run is not None:
+            personalized_metrics = {
+                "personalized/weighted_test_loss": personalized_test_loss,
+                "personalized/weighted_test_score": personalized_test_score,
+            }
+        
+            for client_row in personalized_test_rows:
+                client_id = client_row["client_id"]
+        
+                personalized_metrics[
+                    f"personalized/client_{client_id}/test_loss"
+                ] = client_row["test_loss"]
+        
+                personalized_metrics[
+                    f"personalized/client_{client_id}/test_score"
+                ] = client_row["test_score"]
+        
+                personalized_metrics[
+                    f"personalized/client_{client_id}/num_examples"
+                ] = client_row["num_examples"]
+
             wandb.log(
                 {
+                    personalized_metrics,
                     "test_loss": summary["test_loss"],
                     "test_score": summary["test_score"],
                     "best_val_round": summary["best_val_round"],
@@ -538,6 +559,7 @@ def main() -> None:
                 step=config.federated.num_rounds,
             )
             run.summary.update(summary)
+            run.summary.update(personalized_metrics)
 
         print(json.dumps(summary, indent=2))
     finally:

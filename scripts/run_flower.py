@@ -290,38 +290,164 @@ def main() -> None:
     server_device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     # This fixed head makes centralized validation a representation-learning
     # proxy only. FedPer's real deployable models are global base + client head.
-    torch.manual_seed(config.seed)
-    server_proxy_model = create_federated_model(
-        artifact, config.training.task
-    ).to(server_device)
+    #torch.manual_seed(config.seed)
+    #server_proxy_model = create_federated_model(
+    #    artifact, config.training.task
+    #).to(server_device)
 
-    def evaluate_fn(server_round: int, parameters: Any, _: dict[str, Any]) -> tuple[float, dict[str, float]]:
-        set_base_parameters(
-            server_proxy_model,
-            _coerce_ndarrays(parameters, parameters_to_ndarrays),
+    def evaluate_fn(
+        server_round: int,
+        parameters: Any,
+        _: dict[str, Any],
+    ) -> tuple[float, dict[str, float]] | None:
+        # Round 0 happens before clients have trained or saved personal heads.
+        if server_round == 0:
+            return None
+    
+        global_base_parameters = _coerce_ndarrays(
+            parameters,
+            parameters_to_ndarrays,
         )
-        result = evaluate_model(
-            model=server_proxy_model,
-            loader=val_loader,
-            task=config.training.task,
-            device=server_device,
-        )
-        row = {
-            "round": float(server_round),
-            "val_loss": float(result.loss),
-            "val_score": float(result.score),
+    
+        metadata = artifact["metadata"]
+        global_val_indices = [
+            int(index) for index in artifact["val_indices"]
+        ]
+    
+        total_examples = 0
+        weighted_loss = 0.0
+        weighted_score = 0.0
+    
+        wandb_metrics: dict[str, float] = {
+            "federated/round": float(server_round),
         }
-        eval_rows.append(row)
+    
+        for partition in client_partitions:
+            client_id = partition.client_id
+            head_path = (
+                client_head_dir
+                / f"client_{client_id}_head.pt"
+            )
+    
+            if not head_path.exists():
+                print(
+                    f"Warning: no saved head for client {client_id} "
+                    f"during round {server_round}."
+                )
+                continue
+    
+            # Only use validation examples belonging to this client’s people.
+            client_subjects = set(partition.subject_ids)
+    
+            client_val_indices = [
+                index
+                for index in global_val_indices
+                if str(metadata[index]["subject_id"]) in client_subjects
+            ]
+    
+            if not client_val_indices:
+                print(
+                    f"Warning: no validation examples for client {client_id}."
+                )
+                continue
+    
+            # Build the personalized model:
+            # newest global base + this client’s saved local head.
+            client_model = create_federated_model(
+                artifact,
+                config.training.task,
+            ).to(server_device)
+    
+            set_base_parameters(
+                client_model,
+                global_base_parameters,
+            )
+    
+            client_head_state = torch.load(
+                head_path,
+                map_location=server_device,
+                weights_only=True,
+            )
+    
+            set_head_state(
+                client_model,
+                client_head_state,
+            )
+    
+            client_val_loader = build_loader(
+                artifact=artifact,
+                indices=client_val_indices,
+                task=config.training.task,
+                batch_size=config.training.batch_size,
+                num_workers=config.training.num_workers,
+                shuffle=False,
+                seed=config.seed + int(client_id),
+            )
+    
+            client_result = evaluate_model(
+                model=client_model,
+                loader=client_val_loader,
+                task=config.training.task,
+                device=server_device,
+            )
+    
+            num_examples = len(client_val_indices)
+    
+            total_examples += num_examples
+            weighted_loss += client_result.loss * num_examples
+            weighted_score += client_result.score * num_examples
+    
+            # These keys automatically become W&B line graphs because
+            # they are logged once after every federated round.
+            wandb_metrics[
+                f"personalized/client_{client_id}/val_loss"
+            ] = float(client_result.loss)
+    
+            wandb_metrics[
+                f"personalized/client_{client_id}/val_score"
+            ] = float(client_result.score)
+    
+            wandb_metrics[
+                f"personalized/client_{client_id}/val_num_examples"
+            ] = float(num_examples)
+    
+        if total_examples == 0:
+            print(
+                f"Warning: no personalized validation results "
+                f"for round {server_round}."
+            )
+            return None
+    
+        personalized_val_loss = weighted_loss / total_examples
+        personalized_val_score = weighted_score / total_examples
+    
+        wandb_metrics[
+            "personalized/weighted_val_loss"
+        ] = float(personalized_val_loss)
+    
+        wandb_metrics[
+            "personalized/weighted_val_score"
+        ] = float(personalized_val_score)
+    
         if run is not None:
             wandb.log(
-                {
-                    "federated/round": server_round,
-                    "federated/val_loss": result.loss,
-                    "federated/val_score": result.score,
-                },
+                wandb_metrics,
                 step=server_round,
             )
-        return float(result.loss), {"val_score": float(result.score)}
+    
+        # Save the weighted personalized result in the CSV history.
+        row = {
+            "round": float(server_round),
+            "val_loss": float(personalized_val_loss),
+            "val_score": float(personalized_val_score),
+        }
+        eval_rows.append(row)
+    
+        # Flower also records these as centralized metrics, but they are
+        # now real personalized validation results instead of proxy results.
+        return float(personalized_val_loss), {
+            "val_score": float(personalized_val_score),
+        }
 
     class TrackingFedAvg(FedAvg):
         def __init__(self, *args: Any, **kwargs: Any) -> None:

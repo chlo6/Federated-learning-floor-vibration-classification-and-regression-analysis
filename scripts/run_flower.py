@@ -190,8 +190,18 @@ def main() -> None:
     client_history_path = config.output_dir / f"{result_stem}_federated_client_history.csv"
     summary_path = config.output_dir / f"{result_stem}_federated_summary.json"
     model_path = config.output_dir / f"{result_stem}_flower_model.pt"
-    client_head_dir = config.output_dir / "fedper_heads" / result_stem
-    client_head_dir.mkdir(parents=True, exist_ok=True)
+
+    experiment_id = datetime.utcnow().strftime("%Y%m%d-%H%M%S-%f")
+
+    client_head_dir = (
+        config.output_dir
+        / "fedper_heads"
+        / result_stem
+        / experiment_id
+    )
+    
+    client_head_dir.mkdir(parents=True, exist_ok=False)
+
     save_partition_summary(partition_summary_path, partition_summary)
 
     run = _init_wandb(config, artifact, client_subjects)

@@ -21,6 +21,8 @@ from redo_by_sara.federated import (
     ClientPartition,
     build_client_partitions,
     build_loader,
+    client_class_ids,
+    client_local_label_map,
     create_federated_model,
     create_partition_summary,
     evaluate_model,
@@ -183,6 +185,14 @@ def main() -> None:
         client_partitions=client_partitions,
         client_subjects=client_subjects,
     )
+    client_label_maps = {
+        partition.client_id: client_local_label_map(
+            artifact,
+            partition.subject_ids,
+        )
+        for partition in client_partitions
+    }
+    partition_summary["client_local_label_maps"] = client_label_maps
 
     result_stem = _result_stem(config)
     partition_summary_path = config.output_dir / f"{result_stem}_federated_partitions.json"
@@ -226,6 +236,11 @@ def main() -> None:
             )
             self.artifact = torch.load(artifact_path, map_location="cpu", weights_only=False)
             self.head_path = client_head_dir / f"client_{partition.client_id}_head.pt"
+            self.class_ids = client_class_ids(
+                self.artifact,
+                partition.subject_ids,
+            )
+            self.output_dim = len(self.class_ids)
             self.train_loader = build_loader(
                 artifact=self.artifact,
                 indices=self.partition.train_indices,
@@ -234,10 +249,15 @@ def main() -> None:
                 num_workers=experiment.training.num_workers,
                 shuffle=True,
                 seed=experiment.seed + int(partition.client_id),
+                class_ids=self.class_ids,
             )
 
         def get_parameters(self, config: dict[str, Any]) -> list[Any]:
-            model = create_federated_model(self.artifact, self.task)
+            model = create_federated_model(
+                self.artifact,
+                self.task,
+                output_dim=self.output_dim if self.task == "classification" else None,
+            )
             return get_base_parameters(model)
 
         def fit(
@@ -245,7 +265,11 @@ def main() -> None:
             parameters: list[Any],
             config: dict[str, Any],
         ) -> tuple[list[Any], int, dict[str, float]]:
-            model = create_federated_model(self.artifact, self.task).to(self.device)
+            model = create_federated_model(
+                self.artifact,
+                self.task,
+                output_dim=self.output_dim if self.task == "classification" else None,
+            ).to(self.device)
             if self.head_path.exists():
                 head_state = torch.load(
                     self.head_path, map_location=self.device, weights_only=True
@@ -324,6 +348,7 @@ def main() -> None:
     
         for partition in client_partitions:
             client_id = partition.client_id
+            class_ids = client_class_ids(artifact, partition.subject_ids)
             head_path = (
                 client_head_dir
                 / f"client_{client_id}_head.pt"
@@ -356,6 +381,11 @@ def main() -> None:
             client_model = create_federated_model(
                 artifact,
                 config.training.task,
+                output_dim=(
+                    len(class_ids)
+                    if config.training.task == "classification"
+                    else None
+                ),
             ).to(server_device)
     
             set_base_parameters(
@@ -382,6 +412,11 @@ def main() -> None:
                 num_workers=config.training.num_workers,
                 shuffle=False,
                 seed=config.seed + int(client_id),
+                class_ids=(
+                    class_ids
+                    if config.training.task == "classification"
+                    else None
+                ),
             )
     
             client_result = evaluate_model(
@@ -565,6 +600,7 @@ def main() -> None:
         weighted_test_loss = 0.0
         weighted_test_score = 0.0
         for partition in client_partitions:
+            class_ids = client_class_ids(artifact, partition.subject_ids)
             head_path = client_head_dir / f"client_{partition.client_id}_head.pt"
             if not head_path.exists():
                 continue
@@ -577,7 +613,13 @@ def main() -> None:
             if not client_test_indices:
                 continue
             client_model = create_federated_model(
-                artifact, config.training.task
+                artifact,
+                config.training.task,
+                output_dim=(
+                    len(class_ids)
+                    if config.training.task == "classification"
+                    else None
+                ),
             ).to(server_device)
             set_base_parameters(client_model, final_parameters)
             set_head_state(
@@ -594,6 +636,11 @@ def main() -> None:
                 num_workers=config.training.num_workers,
                 shuffle=False,
                 seed=config.seed + int(partition.client_id),
+                class_ids=(
+                    class_ids
+                    if config.training.task == "classification"
+                    else None
+                ),
             )
             client_result = evaluate_model(
                 model=client_model,
@@ -627,6 +674,7 @@ def main() -> None:
                 "algorithm": "fedper",
                 "base_state_dict": final_model.features.state_dict(),
                 "client_head_dir": str(client_head_dir),
+                "client_local_label_maps": client_label_maps,
             },
             model_path,
         )
@@ -643,10 +691,11 @@ def main() -> None:
             "result_name": config.federated.result_name,
             "model_path": str(model_path),
             "client_head_dir": str(client_head_dir),
-            "server_validation_note": (
-                "Uses a fixed reference head; deploy/evaluate FedPer with each "
-                "client's saved personal head."
+            "validation_note": (
+                "Uses the aggregated base with each client's saved local head "
+                "and client-local label mapping."
             ),
+            "client_local_label_maps": client_label_maps,
             "personalized_test_clients": personalized_test_rows,
             "history_path": str(history_path),
             "client_history_path": str(client_history_path),

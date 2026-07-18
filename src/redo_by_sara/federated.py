@@ -12,19 +12,37 @@ import torch
 from torch import nn
 from torch.utils.data import DataLoader, Dataset
 
+from .models import SimpleCNN1D
 from .training import EvalResult, create_model
 
 
 class IndexedArtifactDataset(Dataset):
-    def __init__(self, artifact: dict[str, object], indices: Sequence[int], task: str) -> None:
+    def __init__(
+        self,
+        artifact: dict[str, object],
+        indices: Sequence[int],
+        task: str,
+        class_ids: Sequence[int] | None = None,
+    ) -> None:
         self.indices = [int(index) for index in indices]
         self.samples = artifact["samples"]
         self.mean = artifact["channel_mean"]
         self.std = artifact["channel_std"]
+        self.global_to_local_class: dict[int, int] | None = None
         if task == "regression":
+            if class_ids is not None:
+                raise ValueError("class_ids can only be used for classification.")
             self.targets = artifact["regression_targets"]
         elif task == "classification":
             self.targets = artifact["classification_targets"]
+            if class_ids is not None:
+                unique_class_ids = [int(class_id) for class_id in class_ids]
+                if len(unique_class_ids) != len(set(unique_class_ids)):
+                    raise ValueError("class_ids must not contain duplicates.")
+                self.global_to_local_class = {
+                    global_class: local_class
+                    for local_class, global_class in enumerate(unique_class_ids)
+                }
         else:
             raise ValueError(f"Unsupported task: {task}")
         self.task = task
@@ -39,6 +57,16 @@ class IndexedArtifactDataset(Dataset):
         y = self.targets[item_index]
         if self.task == "regression":
             y = y.unsqueeze(0)
+        elif self.global_to_local_class is not None:
+            global_class = int(y.item())
+            if global_class not in self.global_to_local_class:
+                raise ValueError(
+                    f"Global class {global_class} is not assigned to this client."
+                )
+            y = torch.tensor(
+                self.global_to_local_class[global_class],
+                dtype=torch.long,
+            )
         return x.float(), y
 
 
@@ -53,6 +81,38 @@ def _as_index_list(indices: Sequence[int] | torch.Tensor) -> list[int]:
     if isinstance(indices, torch.Tensor):
         return [int(index) for index in indices.tolist()]
     return [int(index) for index in indices]
+
+
+def client_class_ids(
+    artifact: dict[str, object],
+    subject_ids: Sequence[str],
+) -> list[int]:
+    """Return a stable global-class ordering for a client's local head."""
+    subject_to_class = artifact["subject_to_class"]
+    missing = [
+        str(subject_id)
+        for subject_id in subject_ids
+        if str(subject_id) not in subject_to_class
+    ]
+    if missing:
+        raise ValueError(f"Subjects missing from subject_to_class: {missing}.")
+    return sorted(int(subject_to_class[str(subject_id)]) for subject_id in subject_ids)
+
+
+def client_local_label_map(
+    artifact: dict[str, object],
+    subject_ids: Sequence[str],
+) -> dict[str, int]:
+    """Map each client subject id to the local class used by its personal head."""
+    subject_to_class = artifact["subject_to_class"]
+    ordered_subjects = sorted(
+        (str(subject_id) for subject_id in subject_ids),
+        key=lambda subject_id: int(subject_to_class[subject_id]),
+    )
+    return {
+        subject_id: local_class
+        for local_class, subject_id in enumerate(ordered_subjects)
+    }
 
 
 def _criterion_for_task(task: str) -> nn.Module:
@@ -214,8 +274,14 @@ def build_loader(
     num_workers: int,
     shuffle: bool,
     seed: int,
+    class_ids: Sequence[int] | None = None,
 ) -> DataLoader:
-    dataset = IndexedArtifactDataset(artifact=artifact, indices=_as_index_list(indices), task=task)
+    dataset = IndexedArtifactDataset(
+        artifact=artifact,
+        indices=_as_index_list(indices),
+        task=task,
+        class_ids=class_ids,
+    )
     generator = torch.Generator()
     generator.manual_seed(seed)
     return DataLoader(
@@ -431,5 +497,18 @@ def save_round_history(path: Path, rows: Sequence[dict[str, Any]]) -> None:
         writer.writerows(rows)
 
 
-def create_federated_model(artifact: dict[str, object], task: str) -> nn.Module:
+def create_federated_model(
+    artifact: dict[str, object],
+    task: str,
+    output_dim: int | None = None,
+) -> nn.Module:
+    if output_dim is not None:
+        if task != "classification":
+            raise ValueError("Custom output_dim is only supported for classification.")
+        if output_dim < 1:
+            raise ValueError("output_dim must be at least 1.")
+        return SimpleCNN1D(
+            in_channels=int(artifact["samples"].shape[1]),
+            output_dim=output_dim,
+        )
     return create_model(artifact=artifact, task=task)

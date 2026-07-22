@@ -43,10 +43,10 @@ training:
   num_workers: 0
 
 federated:
-  result_name: semi_non_iid_fedper
+  result_name: semi_non_iid_fedavg
   num_clients: 3
   num_rounds: 30
-  local_epochs: 3
+  local_epochs: 1
   fraction_fit: 1.0
   fraction_evaluate: 0.0
   client_num_cpus: 1.0
@@ -58,7 +58,7 @@ federated:
 
 wandb:
   enabled: true
-  project: fedper-noniid
+  project: fedavg-noniid
   entity: null
-  tags: ["semi-non-iid", "classification"]
+  tags: ["semi-non-iid", "classification", "fedavg", "baseline"]
   watch: true

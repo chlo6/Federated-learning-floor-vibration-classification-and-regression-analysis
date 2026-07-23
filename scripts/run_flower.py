@@ -8,6 +8,11 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+import matplotlib
+
+matplotlib.use("Agg")
+
+import matplotlib.pyplot as plt
 import torch
 import wandb
 
@@ -135,6 +140,61 @@ def _merge_round_rows(
     return [merged[round_id] for round_id in sorted(merged)]
 
 
+def _confusion_matrix(
+    targets: torch.Tensor,
+    outputs: torch.Tensor,
+    num_classes: int,
+) -> list[list[int]]:
+    """Count true/predicted pairs for one client's local output classes."""
+    matrix = [[0 for _ in range(num_classes)] for _ in range(num_classes)]
+    predictions = torch.argmax(outputs, dim=1)
+    for true_id, predicted_id in zip(
+        targets.reshape(-1).tolist(),
+        predictions.reshape(-1).tolist(),
+        strict=True,
+    ):
+        matrix[int(true_id)][int(predicted_id)] += 1
+    return matrix
+
+
+def _plot_confusion_matrix(
+    matrix: list[list[int]],
+    class_names: list[str],
+    title: str,
+    output_path: Path,
+) -> None:
+    """Save a count and row-percentage confusion matrix as a PNG."""
+    fig, ax = plt.subplots(figsize=(6, 5))
+    image = ax.imshow(matrix, cmap="Blues")
+    fig.colorbar(image, ax=ax, fraction=0.046, pad=0.04)
+    ax.set_xticks(range(len(class_names)), labels=class_names)
+    ax.set_yticks(range(len(class_names)), labels=class_names)
+    ax.set_xlabel("Predicted subject")
+    ax.set_ylabel("True subject")
+    ax.set_title(title)
+
+    max_value = max((max(row) for row in matrix), default=0)
+    for row_index, row in enumerate(matrix):
+        row_total = sum(row)
+        for column_index, value in enumerate(row):
+            percentage = value / row_total if row_total else 0.0
+            label = f"{value}\n{percentage:.0%}"
+            color = "white" if max_value and value > max_value / 2 else "black"
+            ax.text(
+                column_index,
+                row_index,
+                label,
+                ha="center",
+                va="center",
+                color=color,
+            )
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    fig.tight_layout()
+    fig.savefig(output_path, dpi=160)
+    plt.close(fig)
+
+
 class FlowerDependencyError(RuntimeError):
     pass
 
@@ -206,6 +266,12 @@ def main() -> None:
     client_head_dir = (
         config.output_dir
         / "fedper_heads"
+        / result_stem
+        / experiment_id
+    )
+    confusion_dir = (
+        config.output_dir
+        / "confusion_matrices"
         / result_stem
         / experiment_id
     )
@@ -596,6 +662,7 @@ def main() -> None:
         metadata = artifact["metadata"]
         test_indices = [int(index) for index in artifact["test_indices"]]
         personalized_test_rows: list[dict[str, float | str]] = []
+        personalized_confusions: list[dict[str, object]] = []
         total_test_examples = 0
         weighted_test_loss = 0.0
         weighted_test_score = 0.0
@@ -652,14 +719,65 @@ def main() -> None:
             total_test_examples += num_examples
             weighted_test_loss += client_result.loss * num_examples
             weighted_test_score += client_result.score * num_examples
-            personalized_test_rows.append(
-                {
+            client_test_row: dict[str, float | str] = {
+                "client_id": partition.client_id,
+                "num_examples": float(num_examples),
+                "test_loss": float(client_result.loss),
+                "test_score": float(client_result.score),
+            }
+
+            if config.training.task == "classification":
+                local_label_map = client_local_label_map(
+                    artifact,
+                    partition.subject_ids,
+                )
+                class_names = [
+                    subject_id
+                    for subject_id, _ in sorted(
+                        local_label_map.items(),
+                        key=lambda item: item[1],
+                    )
+                ]
+                matrix = _confusion_matrix(
+                    targets=client_result.targets,
+                    outputs=client_result.outputs,
+                    num_classes=len(class_names),
+                )
+                confusion_path = (
+                    confusion_dir
+                    / f"client_{partition.client_id}_test_confusion.png"
+                )
+                confusion_json_path = confusion_path.with_suffix(".json")
+                confusion_payload: dict[str, object] = {
                     "client_id": partition.client_id,
-                    "num_examples": float(num_examples),
-                    "test_loss": float(client_result.loss),
-                    "test_score": float(client_result.score),
+                    "split": "test",
+                    "num_examples": num_examples,
+                    "accuracy": float(client_result.score),
+                    "class_names": class_names,
+                    "local_label_map": local_label_map,
+                    "matrix": matrix,
+                    "plot_path": str(confusion_path),
                 }
-            )
+                _plot_confusion_matrix(
+                    matrix=matrix,
+                    class_names=class_names,
+                    title=(
+                        f"FedPer Client {partition.client_id} Test Confusion "
+                        f"(accuracy {client_result.score:.3f})"
+                    ),
+                    output_path=confusion_path,
+                )
+                confusion_payload["json_path"] = str(confusion_json_path)
+                confusion_json_path.write_text(
+                    json.dumps(confusion_payload, indent=2)
+                )
+                personalized_confusions.append(confusion_payload)
+                client_test_row["confusion_plot_path"] = str(confusion_path)
+                client_test_row["confusion_json_path"] = str(
+                    confusion_json_path
+                )
+
+            personalized_test_rows.append(client_test_row)
         if total_test_examples == 0:
             raise RuntimeError("No personalized FedPer client test examples were found.")
         personalized_test_loss = weighted_test_loss / total_test_examples
@@ -697,6 +815,7 @@ def main() -> None:
             ),
             "client_local_label_maps": client_label_maps,
             "personalized_test_clients": personalized_test_rows,
+            "personalized_test_confusions": personalized_confusions,
             "history_path": str(history_path),
             "client_history_path": str(client_history_path),
             "partition_summary_path": str(partition_summary_path),
@@ -716,6 +835,7 @@ def main() -> None:
                 "personalized/weighted_test_loss": personalized_test_loss,
                 "personalized/weighted_test_score": personalized_test_score,
             }
+            confusion_images: dict[str, Any] = {}
         
             for client_row in personalized_test_rows:
                 client_id = client_row["client_id"]
@@ -731,10 +851,17 @@ def main() -> None:
                 personalized_metrics[
                     f"personalized/client_{client_id}/num_examples"
                 ] = client_row["num_examples"]
+
+                confusion_plot_path = client_row.get("confusion_plot_path")
+                if isinstance(confusion_plot_path, str):
+                    confusion_images[
+                        f"personalized/client_{client_id}/test_confusion"
+                    ] = wandb.Image(confusion_plot_path)
         
             wandb.log(
                 {
                     **personalized_metrics,
+                    **confusion_images,
                     "test_loss": summary["test_loss"],
                     "test_score": summary["test_score"],
                     "best_val_round": summary["best_val_round"],

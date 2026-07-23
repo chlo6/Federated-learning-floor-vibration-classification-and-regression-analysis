@@ -3,6 +3,7 @@ from __future__ import annotations
 import numpy as np
 import torch
 
+from scripts.run_flower import _confusion_matrix
 from src.redo_by_sara.federated import (
     IndexedArtifactDataset,
     client_class_ids,
@@ -93,3 +94,21 @@ def test_client_model_has_only_local_class_logits() -> None:
     logits = model(torch.randn(2, 2, 256))
 
     assert logits.shape == (2, 3)
+
+
+def test_personalized_confusion_matrix_uses_local_class_positions() -> None:
+    targets = torch.tensor([0, 1, 2, 1])
+    outputs = torch.tensor(
+        [
+            [4.0, 0.0, 0.0],
+            [0.0, 0.5, 2.0],
+            [0.0, 0.0, 3.0],
+            [0.0, 5.0, 0.0],
+        ]
+    )
+
+    assert _confusion_matrix(targets, outputs, num_classes=3) == [
+        [1, 0, 0],
+        [0, 1, 1],
+        [0, 0, 1],
+    ]

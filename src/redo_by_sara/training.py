@@ -8,7 +8,7 @@ import torch
 from torch import nn
 from torch.utils.data import DataLoader, Dataset
 
-from .models import SimpleCNN1D
+from .models import DeepCNN1D, SimpleCNN1D
 
 
 class ArtifactDataset(Dataset):
@@ -54,12 +54,24 @@ class EvalResult:
 MetricLogger = Callable[[dict[str, float]], None]
 
 
-def create_model(artifact: dict[str, object], task: str) -> nn.Module:
+def create_model(
+    artifact: dict[str, object],
+    task: str,
+    model_variant: str = "simple",
+) -> nn.Module:
     in_channels = int(artifact["samples"].shape[1])
+    model_class = {
+        "simple": SimpleCNN1D,
+        "deep": DeepCNN1D,
+    }.get(model_variant)
+    if model_class is None:
+        raise ValueError(
+            f"Unsupported model_variant {model_variant!r}; use 'simple' or 'deep'."
+        )
     if task == "regression":
-        return SimpleCNN1D(in_channels=in_channels, output_dim=1)
+        return model_class(in_channels=in_channels, output_dim=1)
     num_classes = len(artifact["subject_to_class"])
-    return SimpleCNN1D(in_channels=in_channels, output_dim=num_classes)
+    return model_class(in_channels=in_channels, output_dim=num_classes)
 
 
 def create_loaders(
@@ -146,10 +158,12 @@ def fit(
     seed: int,
     metric_logger: MetricLogger | None = None,
     run_logger: Any | None = None,
-) -> tuple[nn.Module, list[dict[str, float]], EvalResult]:
+    model_variant: str = "simple",
+    evaluate_test: bool = True,
+) -> tuple[nn.Module, list[dict[str, float]], EvalResult | None]:
     torch.manual_seed(seed)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = create_model(artifact, task).to(device)
+    model = create_model(artifact, task, model_variant=model_variant).to(device)
     train_loader, val_loader, test_loader = create_loaders(artifact, task, batch_size, num_workers)
 
     if run_logger is not None:
@@ -187,5 +201,9 @@ def fit(
             best_state = copy.deepcopy(model.state_dict())
 
     model.load_state_dict(best_state)
-    test_result = run_epoch(model, test_loader, criterion, None, device, task)
+    test_result = (
+        run_epoch(model, test_loader, criterion, None, device, task)
+        if evaluate_test
+        else None
+    )
     return model, history, test_result

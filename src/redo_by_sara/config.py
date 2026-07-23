@@ -31,6 +31,7 @@ class TrainingConfig:
     learning_rate: float
     weight_decay: float
     num_workers: int = 0
+    model_variant: str = "simple"
 
 
 @dataclass
@@ -183,6 +184,7 @@ def load_config(path: str | Path) -> ExperimentConfig:
             learning_rate=float(train_cfg["learning_rate"]),
             weight_decay=float(train_cfg["weight_decay"]),
             num_workers=int(train_cfg.get("num_workers", 0)),
+            model_variant=str(train_cfg.get("model_variant", "simple")),
         ),
         wandb=WandBConfig(
             enabled=bool(wandb_cfg.get("enabled", False)),

@@ -31,3 +31,45 @@ class SimpleCNN1D(nn.Module):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.features(x)
         return self.head(x)
+
+
+class DeepCNN1D(nn.Module):
+    """Higher-capacity centralized baseline for hyperparameter tuning."""
+
+    def __init__(self, in_channels: int, output_dim: int) -> None:
+        super().__init__()
+        self.features = nn.Sequential(
+            nn.Conv1d(in_channels, 32, kernel_size=7, padding=3),
+            nn.GroupNorm(4, 32),
+            nn.ReLU(inplace=True),
+            nn.MaxPool1d(2),
+            nn.Conv1d(32, 64, kernel_size=5, padding=2),
+            nn.GroupNorm(8, 64),
+            nn.ReLU(inplace=True),
+            nn.MaxPool1d(2),
+            nn.Conv1d(64, 128, kernel_size=3, padding=1),
+            nn.GroupNorm(8, 128),
+            nn.ReLU(inplace=True),
+            nn.Conv1d(128, 128, kernel_size=3, padding=1),
+            nn.GroupNorm(8, 128),
+            nn.ReLU(inplace=True),
+            nn.MaxPool1d(2),
+            nn.Conv1d(128, 256, kernel_size=3, padding=1),
+            nn.GroupNorm(16, 256),
+            nn.ReLU(inplace=True),
+            nn.Conv1d(256, 256, kernel_size=3, padding=1),
+            nn.GroupNorm(16, 256),
+            nn.ReLU(inplace=True),
+            nn.MaxPool1d(2),
+            nn.AdaptiveAvgPool1d(1),
+        )
+        self.head = nn.Sequential(
+            nn.Flatten(),
+            nn.Linear(256, 128),
+            nn.ReLU(inplace=True),
+            nn.Dropout(0.2),
+            nn.Linear(128, output_dim),
+        )
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return self.head(self.features(x))

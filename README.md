@@ -1,5 +1,13 @@
 
-This project focuses on three paths using raw vibration windows only:
+## CNN branch: Task 1 centralized baselines
+
+This branch is the centralized-model stage requested before federated
+experiments. Start with [CNN_BASELINE.md](CNN_BASELINE.md) and the
+`configs/centralized_*.yaml` files. The centralized models use all available
+training data in one place; they do not use Flower, clients, aggregation, or
+personalized heads.
+
+The underlying project supports three paths using raw vibration windows:
 
 1. Regression: estimate walking speed.
 2. Classification: identify the subject.

@@ -40,6 +40,7 @@ def _build_wandb_config(config: ExperimentConfig, artifact: dict[str, object]) -
         "epochs": config.training.epochs,
         "learning_rate": config.training.learning_rate,
         "weight_decay": config.training.weight_decay,
+        "model_variant": config.training.model_variant,
         "num_train": artifact["summary"]["num_train"],
         "num_val": artifact["summary"]["num_val"],
         "num_test": artifact["summary"]["num_test"],
@@ -184,12 +185,16 @@ def main() -> None:
             seed=config.seed,
             metric_logger=metric_logger,
             run_logger=(run if config.wandb.enabled and config.wandb.watch else None),
+            model_variant=config.training.model_variant,
         )
+        if test_result is None:
+            raise RuntimeError("Centralized training did not produce a test result.")
 
         config.output_dir.mkdir(parents=True, exist_ok=True)
-        model_path = config.output_dir / f"{config.training.task}_baseline.pt"
-        history_path = config.output_dir / f"{config.training.task}_history.csv"
-        summary_path = config.output_dir / f"{config.training.task}_summary.json"
+        result_stem = f"centralized_{config.training.task}_{config.training.model_variant}"
+        model_path = config.output_dir / f"{result_stem}.pt"
+        history_path = config.output_dir / f"{result_stem}_history.csv"
+        summary_path = config.output_dir / f"{result_stem}_summary.json"
 
         torch.save(model.state_dict(), model_path)
         with history_path.open("w", newline="") as handle:
@@ -200,6 +205,13 @@ def main() -> None:
         best_row = min(history, key=lambda row: row["val_score"]) if config.training.task == "regression" else max(history, key=lambda row: row["val_score"])
         summary = {
             "task": config.training.task,
+            "algorithm": "centralized",
+            "model_variant": config.training.model_variant,
+            "score_name": (
+                "rmse"
+                if config.training.task == "regression"
+                else "accuracy"
+            ),
             "model_path": str(model_path),
             "history_path": str(history_path),
             "best_epoch": int(best_row["epoch"]),
